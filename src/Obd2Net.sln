@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.40629.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Obd2Net", "Obd2Net\Obd2Net.csproj", "{02475E37-60A3-4A4E-94B3-E65EFBAE13BC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Obd2Net.Tests", "Obd2Net.Tests\Obd2Net.Tests.csproj", "{A1B11AFE-E8C5-4A8F-9227-6FC25442F761}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{02475E37-60A3-4A4E-94B3-E65EFBAE13BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02475E37-60A3-4A4E-94B3-E65EFBAE13BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02475E37-60A3-4A4E-94B3-E65EFBAE13BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02475E37-60A3-4A4E-94B3-E65EFBAE13BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1B11AFE-E8C5-4A8F-9227-6FC25442F761}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1B11AFE-E8C5-4A8F-9227-6FC25442F761}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1B11AFE-E8C5-4A8F-9227-6FC25442F761}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1B11AFE-E8C5-4A8F-9227-6FC25442F761}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
