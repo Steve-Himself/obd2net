@@ -157,10 +157,10 @@ namespace Obd2Net
             var d = messages[0].Data;
             var f1 = (int) d[0]; // Single Fuel System in byte 1
 
-            if (f1 <= 0 || !Enum.IsDefined(typeof(Codes.FuelStatus), f1))
+            if (f1 <= 0 || !Enum.IsDefined(typeof(FuelStatus), f1))
                 return new DecoderValue<string>(null, Unit.None);
 
-            return new DecoderValue<string>(((Codes.FuelStatus) f1).GetDescription(), Unit.None);
+            return new DecoderValue<string>(((FuelStatus) f1).GetDescription(), Unit.None);
         }
 
         public static DecoderValue<decimal> Percent(params IMessage[] messages)
@@ -226,10 +226,10 @@ namespace Obd2Net
             var d = messages[0].Data;
             var v = (int) d[0];
 
-            if (v <= 0 || !Enum.IsDefined(typeof(Codes.AirStatus), v))
+            if (v <= 0 || !Enum.IsDefined(typeof(AirStatus), v))
                 return new DecoderValue<string>(null, Unit.None);
 
-            return new DecoderValue<string>(((Codes.AirStatus) v).GetDescription(), Unit.None);
+            return new DecoderValue<string>(((AirStatus) v).GetDescription(), Unit.None);
         }
 
         public static DecoderValue<decimal?> Elm_voltage(params IMessage[] messages)
