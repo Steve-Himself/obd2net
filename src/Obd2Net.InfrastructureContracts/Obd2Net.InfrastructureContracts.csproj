@@ -44,6 +44,7 @@
     <Compile Include="Enums\Unit.cs" />
     <Compile Include="IDecoderValue.cs" />
     <Compile Include="IFrame.cs" />
+    <Compile Include="ILogger.cs" />
     <Compile Include="IMessage.cs" />
     <Compile Include="Enums\OBDStatus.cs" />
     <Compile Include="IPort.cs" />

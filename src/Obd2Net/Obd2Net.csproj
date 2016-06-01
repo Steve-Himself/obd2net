@@ -35,7 +35,6 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App_Packages\LibLog.4.2\LibLog.cs" />
     <Compile Include="Codes.cs" />
     <Compile Include="Commands.cs" />
     <Compile Include="Configuration\ObdBuilder.cs" />
@@ -52,6 +51,7 @@
     <Compile Include="Frame.cs" />
     <Compile Include="Infrastructure\Commands\IOBDCommand.cs" />
     <Compile Include="Infrastructure\Response\IOBDResponse.cs" />
+    <Compile Include="Logging\NullLogger.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="Obd.cs" />
     <Compile Include="Infrastructure\Commands\OBDCommand.cs" />
@@ -75,9 +75,6 @@
     <Compile Include="Status.cs" />
     <Compile Include="Test.cs" />
     <Compile Include="Utils.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Obd2Net.InfrastructureContracts\Obd2Net.InfrastructureContracts.csproj">

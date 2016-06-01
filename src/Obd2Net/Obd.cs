@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
-using Obd2Net.App_Packages.LibLog._4._2;
 using Obd2Net.Infrastructure.Commands;
 using Obd2Net.Infrastructure.Response;
 using Obd2Net.InfrastructureContracts;
@@ -12,17 +11,18 @@ namespace Obd2Net
 {
     public sealed class Obd
     {
-        private static readonly ILog Logger = LogProvider.For<Obd>();
+        private readonly ILogger _logger;
         private readonly bool _fast;
         private string _lastCommand;
 
         private IPort _port;
         private List<IOBDCommand> _supportedCommands;
 
-        internal Obd(string portstr = null, int baudrate = 38400, string protocol = null, bool fast = true)
+        internal Obd(ILogger logger, string portstr = null, int baudrate = 38400, string protocol = null, bool fast = true)
         {
             Commands = new Commands();
             _supportedCommands = Commands.BaseCommands();
+            _logger = logger;
             _fast = fast;
 
             Connect(portstr, baudrate, protocol); // initialize by connecting and loading sensors
@@ -38,26 +38,23 @@ namespace Obd2Net
 
         public IOBDResponse<T> Query<T>(IOBDCommand<T> cmd, bool force = false)
         {
-            using (LogProvider.OpenNestedContext("Query"))
-            using (LogProvider.OpenMappedContext(cmd.Pid.ToString(), cmd.Description))
-            {
                 //primary API function. Sends commands to the car, and
                 //protects against sending unsupported commands.
 
                 if (Status == OBDStatus.NotConnected)
                 {
-                    Logger.Error("Query failed, no connection available");
+                    _logger.Error("Query failed, no connection available");
                     return new OBDResponse<T>();
                 }
 
                 if (!force && !Supports(cmd))
                 {
-                    Logger.Error($"'{cmd}' is not supported");
+                    _logger.Error($"'{cmd}' is not supported");
                     return new OBDResponse<T>();
                 }
 
                 // send command and retrieve message
-                Logger.Debug($"Sending command: {cmd}");
+                _logger.Debug($"Sending command: {cmd}");
                 var cmdString = BuildCommandString(cmd);
                 var messages = _port.SendAndParse(cmdString);
 
@@ -67,11 +64,10 @@ namespace Obd2Net
 
                 if (messages == null || messages.Length == 0)
                 {
-                    Logger.Error("No valid OBD Messages returned");
+                    _logger.Error("No valid OBD Messages returned");
                     return new OBDResponse<T>();
                 }
                 return cmd.Execute(messages); // compute a response object
-            }
         }
 
         public bool Supports(IOBDCommand cmd)
@@ -108,20 +104,20 @@ namespace Obd2Net
         {
             if (string.IsNullOrWhiteSpace(portstr))
             {
-                Logger.Debug("Using scan_serial to select port");
+                _logger.Debug("Using scan_serial to select port");
                 var portnames = SerialPort.GetPortNames();
-                Logger.Debug("Available ports: " + string.Join(",", portnames));
+                _logger.Debug("Available ports: " + string.Join(",", portnames));
 
                 if (!portnames.Any())
                 {
-                    Logger.Debug("No OBD-II adapters found");
+                    _logger.Debug("No OBD-II adapters found");
                     return;
                 }
 
                 foreach (var p in portnames)
                 {
-                    Logger.Debug($"Attempting to use port: {p}");
-                    _port = new Elm327(p, baudrate, protocol);
+                    _logger.Debug($"Attempting to use port: {p}");
+                    _port = new Elm327(_logger, p, baudrate, protocol);
 
                     if (_port.Status >= OBDStatus.ElmConnected)
                         break; // success! stop searching for serial
@@ -129,8 +125,8 @@ namespace Obd2Net
             }
             else
             {
-                Logger.Debug("Explicit port defined");
-                _port = new Elm327(portstr, baudrate, protocol);
+                _logger.Debug("Explicit port defined");
+                _port = new Elm327(_logger, portstr, baudrate, protocol);
             }
             // if the connection failed, close it
             if (_port.Status == OBDStatus.NotConnected)
@@ -149,7 +145,7 @@ namespace Obd2Net
 
             if (_port != null)
             {
-                Logger.Info("Closing connection");
+                _logger.Info("Closing connection");
                 _port.Close();
                 _port = null;
             }
@@ -162,11 +158,11 @@ namespace Obd2Net
         {
             if (Status != OBDStatus.CarConnected)
             {
-                Logger.Debug("Cannot load commands: No connection to car");
+                _logger.Debug("Cannot load commands: No connection to car");
                 return;
             }
 
-            Logger.Debug("querying for supported PIDs (commands)...");
+            _logger.Debug("querying for supported PIDs (commands)...");
             var pidGetters = Commands.PidGetters();
             foreach (var get in pidGetters)
             {
@@ -203,7 +199,7 @@ namespace Obd2Net
                     }
                 }
             }
-            Logger.Debug($"finished querying with {_supportedCommands.Count} commands supported");
+            _logger.Debug($"finished querying with {_supportedCommands.Count} commands supported");
         }
     }
 }

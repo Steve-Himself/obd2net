@@ -67,6 +67,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Obd2Net.InfrastructureContracts\Obd2Net.InfrastructureContracts.csproj">
+      <Project>{CD1A8B19-621A-445E-B227-544EF86D3E56}</Project>
+      <Name>Obd2Net.InfrastructureContracts</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Obd2Net\Obd2Net.csproj">
       <Project>{02475E37-60A3-4A4E-94B3-E65EFBAE13BC}</Project>
       <Name>Obd2Net</Name>

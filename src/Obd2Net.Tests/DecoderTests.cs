@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using FluentAssertions;
 using NUnit.Framework;
+using Obd2Net.InfrastructureContracts;
+using Obd2Net.InfrastructureContracts.Enums;
 
 namespace Obd2Net.Tests
 {

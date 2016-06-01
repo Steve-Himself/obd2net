@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Threading;
-using Obd2Net.App_Packages.LibLog._4._2;
 using Obd2Net.InfrastructureContracts;
 using Obd2Net.InfrastructureContracts.Enums;
 using Obd2Net.InfrastructureContracts.Protocols;
@@ -15,7 +14,7 @@ namespace Obd2Net.Ports
 {
     internal class Elm327 : IPort
     {
-        private static readonly ILog Logger = LogProvider.For<Elm327>();
+        private readonly ILogger _logger;
 
         private static readonly Dictionary<string, Type> SupportedProtocols = new Dictionary<string, Type>
         {
@@ -48,8 +47,9 @@ namespace Obd2Net.Ports
 
         private SerialPort _port;
 
-        public Elm327(string portname, int baudrate, string protocol)
+        public Elm327(ILogger logger, string portname, int baudrate, string protocol)
         {
+            _logger = logger;
             PortName = portname;
             Protocol = new UnknownProtocol();
             _port = new SerialPort(portname, baudrate);
@@ -57,7 +57,7 @@ namespace Obd2Net.Ports
             // ------------- open port -------------
             try
             {
-                Logger.Debug($"Opening serial port '{portname}'");
+                _logger.Debug($"Opening serial port '{portname}'");
                 _port = new SerialPort(portname, baudrate, Parity.None)
                 {
                     StopBits = StopBits.One,
@@ -65,7 +65,7 @@ namespace Obd2Net.Ports
                     WriteTimeout = 3000
                 };
                 _port.Open();
-                Logger.Debug($"Serial port successfully opened on {PortName}");
+                _logger.Debug($"Serial port successfully opened on {PortName}");
             }
             catch (Exception e)
             {
@@ -114,11 +114,11 @@ namespace Obd2Net.Ports
             if (LoadProtocol(protocol))
             {
                 Status = OBDStatus.CarConnected;
-                Logger.Info("Connection successful");
+                _logger.Info("Connection successful");
             }
             else
             {
-                Logger.Info("Connected to the adapter, but failed to connect to the vehicle");
+                _logger.Info("Connected to the adapter, but failed to connect to the vehicle");
             }
         }
 
@@ -152,7 +152,7 @@ namespace Obd2Net.Ports
         {
             if (Status == OBDStatus.NotConnected)
             {
-                Logger.Debug("cannot send_and_parse() when unconnected");
+                _logger.Debug("cannot send_and_parse() when unconnected");
                 return null;
             }
 
@@ -167,7 +167,7 @@ namespace Obd2Net.Ports
 
             if (delay.HasValue)
             {
-                Logger.Debug($"wait: {delay.Value.TotalMilliseconds} Milliseconds");
+                _logger.Debug($"wait: {delay.Value.TotalMilliseconds} Milliseconds");
                 Thread.Sleep(delay.Value);
             }
 
@@ -181,7 +181,7 @@ namespace Obd2Net.Ports
                 // an explicit protocol was specified
                 if (SupportedProtocols.ContainsKey(protocol))
                 {
-                    Logger.Error($"{protocol} is not a valid protocol. Please use \"1\" through \"A\"");
+                    _logger.Error($"{protocol} is not a valid protocol. Please use \"1\" through \"A\"");
                     return false;
                 }
                 return manual_protocol(protocol);
@@ -235,9 +235,9 @@ namespace Obd2Net.Ports
         {
             Close();
 
-            Logger.Debug("Connection Error:");
+            _logger.Debug("Connection Error:");
             if (!string.IsNullOrWhiteSpace(msg))
-                Logger.Debug(msg);
+                _logger.Debug(msg);
         }
 
         /// <summary>
@@ -249,13 +249,13 @@ namespace Obd2Net.Ports
             if (_port != null)
             {
                 cmd += "\r\n"; // terminate
-                Logger.Debug("write: " + cmd);
+                _logger.Debug("write: " + cmd);
                 _port.DiscardInBuffer(); // dump everything in the input buffer
                 var buffer = Utils.GetBytes(cmd);
                 _port.Write(buffer, 0, buffer.Length); // turn the string into bytes and write
             }
             else
-                Logger.Debug("cannot perform Write() when unconnected");
+                _logger.Debug("cannot perform Write() when unconnected");
         }
 
         /// <summary>
@@ -283,11 +283,11 @@ namespace Obd2Net.Ports
                     {
                         if (attempts <= 0)
                         {
-                            Logger.Debug("Failed to read port, giving up");
+                            _logger.Debug("Failed to read port, giving up");
                             break;
                         }
 
-                        Logger.Debug("Failed to read port, trying again...");
+                        _logger.Debug("Failed to read port, trying again...");
                         attempts -= 1;
                         continue;
                     }
@@ -303,11 +303,11 @@ namespace Obd2Net.Ports
                 }
             else
             {
-                Logger.Debug("cannot perform Read() when unconnected");
+                _logger.Debug("cannot perform Read() when unconnected");
                 return new string[0];
             }
 
-            Logger.Debug($"read: {buffer.Count} bytes");
+            _logger.Debug($"read: {buffer.Count} bytes");
 
             // convert bytes into a standard string
             var chars = new char[buffer.Count/sizeof(char)];
