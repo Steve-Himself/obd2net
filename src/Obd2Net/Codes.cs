@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel;
 
 namespace Obd2Net
 {
@@ -1774,8 +1773,6 @@ namespace Obd2Net
             {"P3495", "Cylinder 12 Exhaust Valve Control Circuit Low"},
             {"P3496", "Cylinder 12 Exhaust Valve Control Circuit High"},
             {"P3497", "Cylinder Deactivation System"},
-
-
             {"U0001", "High Speed CAN Communication Bus"},
             {"U0002", "High Speed CAN Communication Bus (Performance)"},
             {"U0003", "High Speed CAN Communication Bus (Open)"},
@@ -2074,13 +2071,13 @@ namespace Obd2Net
             {"U0428", "Invalid Data Received From Steering Angle Sensor Module"},
             {"U0429", "Invalid Data Received From Steering Column Control Module"},
             {"U0430", "Invalid Data Received From Tire Pressure Monitor Module"},
-            {"U0431", "Invalid Data Received From Body Control Module 'A'"},
+            {"U0431", "Invalid Data Received From Body Control Module 'A'"}
         };
 
         public static readonly List<string> IgnitionType = new List<string>
         {
             "Spark",
-            "Compression",
+            "Compression"
         };
 
         public static readonly List<string> SparkTests = new List<string>
@@ -2092,7 +2089,7 @@ namespace Obd2Net
             "Secondary Air System",
             "Evaporative System",
             "Heated Catalyst",
-            "Catalyst",
+            "Catalyst"
         };
 
         public static readonly List<string> CompressionTests = new List<string>
@@ -2104,9 +2101,8 @@ namespace Obd2Net
             "Boost Pressure",
             "None",
             "NOx/SCR Monitor",
-            "NMHC Catalyst",
+            "NMHC Catalyst"
         };
-
 
 
         public static readonly List<string> OBDCompliance = new List<string>
@@ -2144,7 +2140,7 @@ namespace Obd2Net
             "Korean OBD (KOBD)",
             "India OBD I (IOBD I)",
             "India OBD II (IOBD II)",
-            "Heavy Duty Euro OBD Stage VI (HD EOBD-IV)",
+            "Heavy Duty Euro OBD Stage VI (HD EOBD-IV)"
         };
 
         public static readonly List<string> FuelTypes = new List<string>
@@ -2172,7 +2168,7 @@ namespace Obd2Net
             "Hybrid Electric",
             "Hybrid running electric and combustion engine",
             "Hybrid Regenerative",
-            "Bifuel running diesel",
+            "Bifuel running diesel"
         };
     }
 }

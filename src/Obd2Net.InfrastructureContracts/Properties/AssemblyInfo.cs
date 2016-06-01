@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 
-[assembly: AssemblyTitle("Obd2Net.Tests")]
+[assembly: AssemblyTitle("Obd2Net.InfrastructureContracts")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("RACQGROUP")]
-[assembly: AssemblyProduct("Obd2Net.Tests")]
+[assembly: AssemblyProduct("Obd2Net.InfrastructureContracts")]
 [assembly: AssemblyCopyright("Copyright © RACQGROUP 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -22,7 +22,7 @@ using System.Runtime.InteropServices;
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 
-[assembly: Guid("27c42ec8-619c-4f16-84fa-5e15ce5be667")]
+[assembly: Guid("8180b71d-b580-4b5b-ad26-2a4e9403afb7")]
 
 // Version information for an assembly consists of the following four values:
 //

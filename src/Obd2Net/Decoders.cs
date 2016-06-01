@@ -3,21 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Obd2Net.Extensions;
+using Obd2Net.InfrastructureContracts;
+using Obd2Net.InfrastructureContracts.Enums;
 
 namespace Obd2Net
 {
-    public class DecoderValue<T>
-    {
-        public T Value { get; private set; }
-        public Unit Unit { get; private set; }
-
-        public DecoderValue(T value, Unit unit)
-        {
-            Value = value;
-            Unit = unit;
-        }
-    }
-
     public static class Decoders
     {
         private const string UnknownErrorCode = "Unknown error code";
@@ -35,7 +25,7 @@ namespace Obd2Net
             return new DecoderValue<uint>(v, Unit.Min);
         }
 
-        private static string BytesToBits(byte[] bytes)
+        private static string BytesToBits(IEnumerable<byte> bytes)
         {
             return string.Join("", bytes.Select(b => Convert.ToString(b, 2).PadLeft(8, '0')));
         }
@@ -54,7 +44,7 @@ namespace Obd2Net
 
             var output = new Status
             {
-                MIL = bits[0],
+                Mil = bits[0],
                 DTCCount = Utils.Unbin(bits, 0, 7),
                 IgnitionType = Codes.IgnitionType[Utils.Unbin(bits, 12)]
             };
@@ -72,12 +62,11 @@ namespace Obd2Net
                 // spark
                 foreach (var i in Enumerable.Range(0, 7))
                 {
-                    if (Codes.SparkTests[i] != null)
-                    {
-                        var t = new Test(Codes.SparkTests[i], bits[(2*8) + i], bits[(3*8) + i]);
+                    if (Codes.SparkTests[i] == null) continue;
 
-                        output.Tests.Add(t);
-                    }
+                    var t = new Test(Codes.SparkTests[i], bits[2*8 + i], bits[3*8 + i]);
+
+                    output.Tests.Add(t);
                 }
             }
             else if (output.IgnitionType == Codes.IgnitionType[1])
@@ -87,7 +76,7 @@ namespace Obd2Net
                 {
                     if (Codes.CompressionTests[i] != null)
                     {
-                        var t = new Test(Codes.CompressionTests[i], bits[(2*8) + i], bits[(3*8) + i]);
+                        var t = new Test(Codes.CompressionTests[i], bits[2*8 + i], bits[3*8 + i]);
 
                         output.Tests.Add(t);
                     }
@@ -124,7 +113,7 @@ namespace Obd2Net
         }
 
         /// <summary>
-        /// Converts a frame of 2-byte DTCs into a list of DTCs
+        ///     Converts a frame of 2-byte DTCs into a list of DTCs
         /// </summary>
         public static DecoderValue<IDictionary<string, string>> DTC(params IMessage[] messages)
         {
@@ -133,15 +122,14 @@ namespace Obd2Net
 
             for (var n = 1; n < d.Length; n += 2)
             {
-                var dtc = SingleDtc(new[] {d[n-1], d[n]});
-                if (!string.IsNullOrWhiteSpace(dtc))
-                {
-                    string desc = null;
+                var dtc = SingleDtc(new[] {d[n - 1], d[n]});
+                if (string.IsNullOrWhiteSpace(dtc)) continue;
 
-                    if (Codes.DTC.ContainsKey(dtc))
-                        desc = Codes.DTC[dtc];
-                    codes[dtc] = desc ?? UnknownErrorCode;
-                }
+                string desc = null;
+
+                if (Codes.DTC.ContainsKey(dtc))
+                    desc = Codes.DTC[dtc];
+                codes[dtc] = desc ?? UnknownErrorCode;
             }
 
             return new DecoderValue<IDictionary<string, string>>(codes, Unit.None);
@@ -309,7 +297,7 @@ namespace Obd2Net
             var d = messages[0].Data;
             var a = Utils.TwosComp(d[0], 8);
             var b = Utils.TwosComp(d[1], 8);
-            var v = ((a*256.0m) + b)/4.0m;
+            var v = (a*256.0m + b)/4.0m;
             return new DecoderValue<decimal>(v, Unit.Pa);
         }
 
@@ -317,7 +305,7 @@ namespace Obd2Net
         {
             var d = messages[0].Data;
             var v = Utils.BytesToInt(d);
-            var k = (v/10.0m) - 40m;
+            var k = v/10.0m - 40m;
             return new DecoderValue<decimal>(k, Unit.C);
         }
 

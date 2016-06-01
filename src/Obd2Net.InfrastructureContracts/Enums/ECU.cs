@@ -1,4 +1,4 @@
-﻿namespace Obd2Net
+﻿namespace Obd2Net.InfrastructureContracts.Enums
 {
     public enum ECU
     {

@@ -10,7 +10,7 @@ namespace Obd2Net.Extensions
         {
             var fi = value.GetType().GetField(value.ToString());
 
-            var attribute = (DescriptionAttribute)fi.GetCustomAttributes(typeof(DescriptionAttribute),false).FirstOrDefault();
+            var attribute = (DescriptionAttribute) fi.GetCustomAttributes(typeof(DescriptionAttribute), false).FirstOrDefault();
 
             return attribute != null ? attribute.Description : value.ToString();
         }

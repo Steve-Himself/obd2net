@@ -255,7 +255,7 @@ namespace Obd2Net.Tests
         }
 
         [TestCaseSource(typeof(DtcTestCases), "TestCases")]
-        public void DtcTest(IMessage[] messages, DecoderValue<IDictionary<string,string>> result)
+        public void DtcTest(IMessage[] messages, DecoderValue<IDictionary<string, string>> result)
         {
             Decoders.DTC(messages).ShouldBeEquivalentTo(result);
         }
@@ -266,55 +266,55 @@ namespace Obd2Net.Tests
             {
                 get
                 {
-                    yield return new TestCaseData(new[] { Message.FromHexString("0104") }, 
+                    yield return new TestCaseData(new[] {Message.FromHexString("0104")},
                         new DecoderValue<IDictionary<string, string>>(
                             new Dictionary<string, string>
                             {
-                                { "P0104", "Mass or Volume Air Flow Circuit Intermittent" }
+                                {"P0104", "Mass or Volume Air Flow Circuit Intermittent"}
                             }, Unit.None))
                     {
                         TestName = "Single Code"
                     };
 
-                    yield return new TestCaseData(new[] { Message.FromHexString("010480034123") }, 
+                    yield return new TestCaseData(new[] {Message.FromHexString("010480034123")},
                         new DecoderValue<IDictionary<string, string>>(
                             new Dictionary<string, string>
                             {
-                                { "P0104", "Mass or Volume Air Flow Circuit Intermittent" },
-                                { "B0003", "Unknown error code" },
-                                { "C0123", "Unknown error code" },
+                                {"P0104", "Mass or Volume Air Flow Circuit Intermittent"},
+                                {"B0003", "Unknown error code"},
+                                {"C0123", "Unknown error code"}
                             }, Unit.None))
                     {
                         TestName = "Multiple Codes"
                     };
 
-                    yield return new TestCaseData(new[] { Message.FromHexString("0104800341") },
+                    yield return new TestCaseData(new[] {Message.FromHexString("0104800341")},
                         new DecoderValue<IDictionary<string, string>>(
                             new Dictionary<string, string>
                             {
-                                { "P0104", "Mass or Volume Air Flow Circuit Intermittent" },
-                                { "B0003", "Unknown error code" },
+                                {"P0104", "Mass or Volume Air Flow Circuit Intermittent"},
+                                {"B0003", "Unknown error code"}
                             }, Unit.None))
                     {
                         TestName = "Invalid code lengths are dropped"
                     };
 
-                    yield return new TestCaseData(new[] { Message.FromHexString("000001040000") },
+                    yield return new TestCaseData(new[] {Message.FromHexString("000001040000")},
                         new DecoderValue<IDictionary<string, string>>(
                             new Dictionary<string, string>
                             {
-                                { "P0104", "Mass or Volume Air Flow Circuit Intermittent" },
+                                {"P0104", "Mass or Volume Air Flow Circuit Intermittent"}
                             }, Unit.None))
                     {
                         TestName = "0000 codes are dropped"
                     };
 
-                    yield return new TestCaseData(new[] { Message.FromHexString("0104"), Message.FromHexString("8003"), Message.FromHexString("0000") },
+                    yield return new TestCaseData(new[] {Message.FromHexString("0104"), Message.FromHexString("8003"), Message.FromHexString("0000")},
                         new DecoderValue<IDictionary<string, string>>(
                             new Dictionary<string, string>
                             {
-                                { "P0104", "Mass or Volume Air Flow Circuit Intermittent" },
-                                { "B0003", "Unknown error code" },
+                                {"P0104", "Mass or Volume Air Flow Circuit Intermittent"},
+                                {"B0003", "Unknown error code"}
                             }, Unit.None))
                     {
                         TestName = "Multiple Messages"

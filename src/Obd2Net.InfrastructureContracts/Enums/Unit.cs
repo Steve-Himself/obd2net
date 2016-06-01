@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace Obd2Net
+namespace Obd2Net.InfrastructureContracts.Enums
 {
     public enum Unit
     {
@@ -23,6 +23,6 @@ namespace Obd2Net
         [Description("Grams per Second")] Gps,
         [Description("mA")] Ma,
         [Description("km")] Km,
-        [Description("Liters per Hour")] Lph,
+        [Description("Liters per Hour")] Lph
     }
 }
