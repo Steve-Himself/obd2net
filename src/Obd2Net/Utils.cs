@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Obd2Net
@@ -63,16 +64,12 @@ namespace Obd2Net
 
         public static byte[] GetBytes(string str)
         {
-            var bytes = new byte[str.Length*sizeof(char)];
-            Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
-            return bytes;
+            return Encoding.ASCII.GetBytes(str);
         }
 
         public static string GetString(byte[] bytes)
         {
-            var chars = new char[bytes.Length/sizeof(char)];
-            Buffer.BlockCopy(bytes, 0, chars, 0, bytes.Length);
-            return new string(chars);
+            return Encoding.ASCII.GetString(bytes);
         }
 
         public static bool IsHex(string str)

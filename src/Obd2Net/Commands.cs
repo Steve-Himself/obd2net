@@ -8,7 +8,7 @@ namespace Obd2Net
     {
         public List<IOBDCommand> BaseCommands()
         {
-            throw new NotImplementedException();
+            return new List<IOBDCommand>();
         }
 
         public IEnumerable<IOBDCommand<string>> PidGetters()

@@ -14,12 +14,6 @@ namespace Obd2Net.Protocols
         //public IMessage[] Messages { get; protected set; }
         private readonly Dictionary<int, ECU> _ecuMap = new Dictionary<int, ECU>();
 
-        protected ProtocolBase(IMessage[] messages)
-        {
-            //Messages = messages;
-            populate_EcuMap(messages);
-        }
-
         protected abstract int TxIdEngine { get; }
 
         public abstract string ElmName { get; }
@@ -97,7 +91,7 @@ namespace Obd2Net.Protocols
             return messages.ToArray();
         }
 
-        protected void populate_EcuMap(IMessage[] messages)
+        public void PopulateEcuMap(IMessage[] messages)
         {
             //  filter out messages that don't contain any data
             //  this will prevent ELM responses from being mapped to ECUs

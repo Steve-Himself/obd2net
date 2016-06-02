@@ -5,10 +5,6 @@ namespace Obd2Net.Protocols.Legacy
 {
     public abstract class LegacyProtocol : ProtocolBase
     {
-        protected LegacyProtocol(IMessage[] messages) : base(messages)
-        {
-        }
-
         protected override int TxIdEngine => 0x10;
 
         public override bool ParseFrame(IFrame frame)

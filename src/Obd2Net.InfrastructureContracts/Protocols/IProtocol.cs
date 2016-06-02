@@ -1,4 +1,6 @@
-﻿namespace Obd2Net.InfrastructureContracts.Protocols
+﻿using System;
+
+namespace Obd2Net.InfrastructureContracts.Protocols
 {
     public interface IProtocol
     {
@@ -7,5 +9,6 @@
         bool ParseFrame(IFrame frame);
         bool ParseMessage(IMessage message);
         IMessage[] Parse(params string[] lines);
+        void PopulateEcuMap(IMessage[] messages);
     }
 }

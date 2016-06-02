@@ -1,31 +1,29 @@
 ﻿using System.Collections.Generic;
-using System.IO.Ports;
-using System.Linq;
 using Obd2Net.Infrastructure.Commands;
 using Obd2Net.Infrastructure.Response;
 using Obd2Net.InfrastructureContracts;
 using Obd2Net.InfrastructureContracts.Enums;
+using Obd2Net.InfrastructureContracts.Protocols;
 using Obd2Net.Ports;
 
 namespace Obd2Net
 {
-    public sealed class Obd
+    public sealed class Obd<TProtocol> where TProtocol : IProtocol
     {
         private readonly ILogger _logger;
-        private readonly bool _fast;
         private string _lastCommand;
 
         private IPort _port;
         private List<IOBDCommand> _supportedCommands;
 
-        internal Obd(ILogger logger, string portstr = null, int baudrate = 38400, string protocol = null, bool fast = true)
+        internal Obd(ILogger logger, Elm327<TProtocol> port)
         {
             Commands = new Commands();
             _supportedCommands = Commands.BaseCommands();
             _logger = logger;
-            _fast = fast;
+            _port = port;
 
-            Connect(portstr, baudrate, protocol); // initialize by connecting and loading sensors
+            Connect(); // initialize by connecting and loading sensors
             LoadCommands(); // try to load the car's supported commands
         }
 
@@ -83,13 +81,13 @@ namespace Obd2Net
             var cmdString = cmd.Command;
 
             // only wait for as many ECUs as we've seen
-            if (_fast && cmd.Fast)
+            if (_port.Config.Fast && cmd.Fast)
             {
                 cmdString += _port.Ecus.Length.ToString(); // TODO: ?? str(len(self.port.ecus()));
             }
 
             // if we sent this last time, just send
-            if (_fast && cmdString == _lastCommand)
+            if (_port.Config.Fast && cmdString == _lastCommand)
             {
                 cmdString = "";
             }
@@ -100,34 +98,9 @@ namespace Obd2Net
         /// <summary>
         ///     Attempts to instantiate an ELM327 connection object.
         /// </summary>
-        private void Connect(string portstr, int baudrate, string protocol)
+        private void Connect()
         {
-            if (string.IsNullOrWhiteSpace(portstr))
-            {
-                _logger.Debug("Using scan_serial to select port");
-                var portnames = SerialPort.GetPortNames();
-                _logger.Debug("Available ports: " + string.Join(",", portnames));
-
-                if (!portnames.Any())
-                {
-                    _logger.Debug("No OBD-II adapters found");
-                    return;
-                }
-
-                foreach (var p in portnames)
-                {
-                    _logger.Debug($"Attempting to use port: {p}");
-                    _port = new Elm327(_logger, p, baudrate, protocol);
-
-                    if (_port.Status >= OBDStatus.ElmConnected)
-                        break; // success! stop searching for serial
-                }
-            }
-            else
-            {
-                _logger.Debug("Explicit port defined");
-                _port = new Elm327(_logger, portstr, baudrate, protocol);
-            }
+            _port.Connect();
             // if the connection failed, close it
             if (_port.Status == OBDStatus.NotConnected)
             {

@@ -3,134 +3,46 @@ using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Threading;
+using Obd2Net.Configuration;
 using Obd2Net.InfrastructureContracts;
 using Obd2Net.InfrastructureContracts.Enums;
 using Obd2Net.InfrastructureContracts.Protocols;
-using Obd2Net.Protocols;
-using Obd2Net.Protocols.Can;
-using Obd2Net.Protocols.Legacy;
 
 namespace Obd2Net.Ports
 {
-    internal class Elm327 : IPort
+    internal class Elm327<TProtocol> : IPort where TProtocol : IProtocol
     {
         private readonly ILogger _logger;
+        private SerialPort _serialPort;
 
-        private static readonly Dictionary<string, Type> SupportedProtocols = new Dictionary<string, Type>
-        {
-            {"0", null},
-            {"1", typeof(SAE_J1850_PWM)},
-            {"2", typeof(SAE_J1850_VPW)},
-            {"3", typeof(ISO_9141_2)},
-            {"4", typeof(ISO_14230_4_5baud)},
-            {"5", typeof(ISO_14230_4_fast)},
-            {"6", typeof(ISO_15765_4_11bit_500k)},
-            {"7", typeof(ISO_15765_4_29bit_500k)},
-            {"8", typeof(ISO_15765_4_11bit_250k)},
-            {"9", typeof(ISO_15765_4_29bit_250k)},
-            {"A", typeof(SAE_J1939)}
-        };
+        //private static readonly string[] TryProtocolOrder =
+        //{
+        //    "6", // ISO_15765_4_11bit_500k
+        //    "8", // ISO_15765_4_11bit_250k
+        //    "1", // SAE_J1850_PWM
+        //    "7", // ISO_15765_4_29bit_500k
+        //    "9", // ISO_15765_4_29bit_250k
+        //    "2", // SAE_J1850_VPW
+        //    "3", // ISO_9141_2
+        //    "4", // ISO_14230_4_5baud
+        //    "5", // ISO_14230_4_fast
+        //    "A" // SAE_J1939
+        //};
 
-        private static readonly string[] TryProtocolOrder =
-        {
-            "6", // ISO_15765_4_11bit_500k
-            "8", // ISO_15765_4_11bit_250k
-            "1", // SAE_J1850_PWM
-            "7", // ISO_15765_4_29bit_500k
-            "9", // ISO_15765_4_29bit_250k
-            "2", // SAE_J1850_VPW
-            "3", // ISO_9141_2
-            "4", // ISO_14230_4_5baud
-            "5", // ISO_14230_4_fast
-            "A" // SAE_J1939
-        };
-
-        private SerialPort _port;
-
-        public Elm327(ILogger logger, string portname, int baudrate, string protocol)
+        public Elm327(ILogger logger, TProtocol protocol, ObdConfiguration config)
         {
             _logger = logger;
-            PortName = portname;
-            Protocol = new UnknownProtocol();
-            _port = new SerialPort(portname, baudrate);
-
-            // ------------- open port -------------
-            try
-            {
-                _logger.Debug($"Opening serial port '{portname}'");
-                _port = new SerialPort(portname, baudrate, Parity.None)
-                {
-                    StopBits = StopBits.One,
-                    ReadTimeout = 3000,
-                    WriteTimeout = 3000
-                };
-                _port.Open();
-                _logger.Debug($"Serial port successfully opened on {PortName}");
-            }
-            catch (Exception e)
-            {
-                Error(e.Message);
-                return;
-            }
-
-            // ---------------------------- ATZ (reset) ----------------------------
-            try
-            {
-                Send("ATZ", TimeSpan.FromSeconds(1)); // wait 1 second for ELM to initialize
-            }
-            catch (Exception e)
-            {
-                Error(e.Message);
-                return;
-            }
-
-            // -------------------------- ATE0 (echo OFF) --------------------------
-            var r = Send("ATE0");
-            if (!IsOk(r, true))
-            {
-                Error("ATE0 did not return 'OK'");
-                return;
-            }
-
-            // ------------------------- ATH1 (headers ON) -------------------------
-            r = Send("ATH1");
-            if (!IsOk(r))
-            {
-                Error("ATH1 did not return 'OK', or echoing is still ON");
-                return;
-            }
-            // ------------------------ ATL0 (linefeeds OFF) -----------------------
-            r = Send("ATL0");
-            if (!IsOk(r))
-            {
-                Error("ATL0 did not return 'OK'");
-                return;
-            }
-
-            // by now, we've successfuly communicated with the ELM, but not the car
-            Status = OBDStatus.ElmConnected;
-
-            // try to communicate with the car, and load the correct protocol parser
-            if (LoadProtocol(protocol))
-            {
-                Status = OBDStatus.CarConnected;
-                _logger.Info("Connection successful");
-            }
-            else
-            {
-                _logger.Info("Connected to the adapter, but failed to connect to the vehicle");
-            }
+            Config = config;
+            Protocol = protocol;
         }
 
         public IProtocol Protocol { get; private set; }
 
+        public IObdConfiguration Config { get; }
+
         public OBDStatus Status { get; private set; }
-        public string PortName { get; }
+
         public ECU[] Ecus { get; }
-
-        public string ProtocolName => Protocol.ElmName;
-
-        public string ProtocolId => Protocol.ElmId;
 
         /// <summary>
         ///     Resets the device, and sets all attributes to unconnected states.
@@ -140,11 +52,11 @@ namespace Obd2Net.Ports
             Status = OBDStatus.NotConnected;
             Protocol = null;
 
-            if (_port != null)
+            if (_serialPort != null)
             {
                 Write("ATZ");
-                _port.Close();
-                _port = null;
+                _serialPort.Close();
+                _serialPort = null;
             }
         }
 
@@ -174,46 +86,116 @@ namespace Obd2Net.Ports
             return Read();
         }
 
-        private bool LoadProtocol(string protocol)
+        public bool Connect()
         {
-            if (protocol != null)
+            if (string.IsNullOrWhiteSpace(Config.Portname))
+                return ScanPortsAndConnect();
+
+            return ConnectToSerialPort(Config.Portname, Config.Baudrate);
+        }
+
+        private bool ConnectToSerialPort(string portname, int baudrate)
+        {
+            _serialPort = new SerialPort(Config.Portname, Config.Baudrate);
+            var timeout = Convert.ToInt32(Config.Timeout.TotalMilliseconds);
+            // ------------- open port -------------
+            try
             {
-                // an explicit protocol was specified
-                if (SupportedProtocols.ContainsKey(protocol))
+                _logger.Debug($"Opening serial port '{Config.Portname}'");
+                _serialPort = new SerialPort(Config.Portname, Config.Baudrate, Parity.None)
                 {
-                    _logger.Error($"{protocol} is not a valid protocol. Please use \"1\" through \"A\"");
-                    return false;
-                }
-                return manual_protocol(protocol);
+                    StopBits = StopBits.One,
+                    ReadTimeout = timeout,
+                    WriteTimeout = timeout
+                };
+                _serialPort.Open();
+                _logger.Debug($"Serial port successfully opened on {Config.Portname}");
+            }
+            catch (Exception e)
+            {
+                Error(e.Message);
+                return false;
             }
 
-            //  auto detect the protocol
-            return auto_protocol();
-        }
-
-        private bool auto_protocol()
-        {
-            throw new NotImplementedException();
-        }
-
-        private bool manual_protocol(string protocol)
-        {
-            var r = Send($"ATTP{protocol}");
-            var r0100 = Send("0100");
-
-            if (!r0100.Any(m => m.Contains("UNABLE TO CONNECT")))
+            // ---------------------------- ATZ (reset) ----------------------------
+            try
             {
-                // success, found the protocol
-                var protocolType = SupportedProtocols[protocol];
-                Protocol = CreateProtocol(protocolType, r0100);
+                Send("ATZ", TimeSpan.FromSeconds(1)); // wait 1 second for ELM to initialize
+            }
+            catch (Exception e)
+            {
+                Error(e.Message);
+                return false;
+            }
+
+            // -------------------------- ATE0 (echo OFF) --------------------------
+            var r = Send("ATE0");
+            if (!IsOk(r, true))
+            {
+                Error("ATE0 did not return 'OK'");
+                return false;
+            }
+
+            // ------------------------- ATH1 (headers ON) -------------------------
+            r = Send("ATH1");
+            if (!IsOk(r))
+            {
+                Error("ATH1 did not return 'OK', or echoing is still ON");
+                return false;
+            }
+            // ------------------------ ATL0 (linefeeds OFF) -----------------------
+            r = Send("ATL0");
+            if (!IsOk(r))
+            {
+                Error("ATL0 did not return 'OK'");
+                return false;
+            }
+
+            // by now, we've successfuly communicated with the ELM, but not the car
+            Status = OBDStatus.ElmConnected;
+
+            // try to communicate with the car, and load the correct protocol parser
+            if (CheckProtocol())
+            {
+                Status = OBDStatus.CarConnected;
+                _logger.Info("Connection successful");
                 return true;
+            }
+
+            _logger.Info("Connected to the adapter, but failed to connect to the vehicle");
+            return false;
+        }
+
+        private bool ScanPortsAndConnect()
+        {
+            if (string.IsNullOrWhiteSpace(Config.Portname))
+            {
+                _logger.Debug("Using scan_serial to select port");
+                var portnames = SerialPort.GetPortNames();
+                _logger.Debug("Available ports: " + string.Join(",", portnames));
+
+                if (!portnames.Any())
+                {
+                    _logger.Debug("No OBD-II adapters found");
+                    return false;
+                }
+
+                foreach (var p in portnames)
+                {
+                    _logger.Debug($"Attempting to use port: {p}");
+                    if (ConnectToSerialPort(p, Config.Baudrate))
+                        return true; // Connected
+                }
             }
             return false;
         }
 
-        private IProtocol CreateProtocol(Type protocolType, string[] r0100)
+        private bool CheckProtocol()
         {
-            throw new NotImplementedException();
+            Send($"ATTP{Protocol.ElmId}");
+            var r0100 = Send("0100");
+
+            return !r0100.Any(m => m.Contains("UNABLE TO CONNECT"));
         }
 
         private bool IsOk(string[] lines, bool expectEcho = false)
@@ -223,8 +205,8 @@ namespace Obd2Net.Ports
 
             if (expectEcho)
             {
-                //# don't test for the echo itself
-                //# allow the adapter to already have echo disabled
+                // don't test for the echo itself
+                // allow the adapter to already have echo disabled
                 return lines.Any(l => l.Contains("OK"));
             }
 
@@ -246,13 +228,13 @@ namespace Obd2Net.Ports
         /// <param name="cmd"></param>
         private void Write(string cmd)
         {
-            if (_port != null)
+            if (_serialPort != null)
             {
                 cmd += "\r\n"; // terminate
                 _logger.Debug("write: " + cmd);
-                _port.DiscardInBuffer(); // dump everything in the input buffer
+                _serialPort.DiscardInBuffer(); // dump everything in the input buffer
                 var buffer = Utils.GetBytes(cmd);
-                _port.Write(buffer, 0, buffer.Length); // turn the string into bytes and write
+                _serialPort.Write(buffer, 0, buffer.Length); // turn the string into bytes and write
             }
             else
                 _logger.Debug("cannot perform Write() when unconnected");
@@ -267,13 +249,13 @@ namespace Obd2Net.Ports
             var attempts = 2;
             var buffer = new List<byte>();
 
-            if (_port != null)
+            if (_serialPort != null)
                 while (true)
                 {
                     byte? c = null;
                     try
                     {
-                        c = (byte) _port.ReadByte();
+                        c = (byte)_serialPort.ReadChar();
                     }
                     catch (TimeoutException)
                     {
@@ -310,14 +292,20 @@ namespace Obd2Net.Ports
             _logger.Debug($"read: {buffer.Count} bytes");
 
             // convert bytes into a standard string
-            var chars = new char[buffer.Count/sizeof(char)];
-            Buffer.BlockCopy(buffer.ToArray(), 0, chars, 0, buffer.Count);
-            var raw = new string(chars);
+            var raw = Utils.GetString(buffer.ToArray());
 
             // splits into lines
             // removes empty lines
             // removes trailing spaces
             return raw.Split(new[] {"\r\n"}, StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        public void Dispose()
+        {
+            if (_serialPort?.IsOpen??false)
+                _serialPort.Close();
+
+            _serialPort = null;
         }
     }
 }

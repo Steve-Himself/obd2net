@@ -11,14 +11,8 @@ namespace Obd2Net.Protocols.Can
         private const byte FrameTypeSingleFrame = 0x00; // single frame
         private const byte FrameTypeFirstFrame = 0x10; // first frame of multi-frame message
         private const byte FrameTypeConsecutiveFrame = 0x20; // consecutive frame(s) of multi-frame message
-        private readonly int _idBits;
 
-        protected CanProtocol(IMessage[] messages, int idBits)
-            : base(messages)
-        {
-            _idBits = idBits;
-        }
-
+        protected abstract int IdBits { get; }
         protected override int TxIdEngine => 0;
 
         public override bool ParseFrame(IFrame frame)
@@ -32,7 +26,7 @@ namespace Obd2Net.Protocols.Can
             // to:
             // 00 00 07 E8 06 41 00 BE 7F B8 13
 
-            if (_idBits == 11)
+            if (IdBits == 11)
                 raw = "00000" + raw;
 
             var rawBytes = raw.ToByteArray();
@@ -51,7 +45,7 @@ namespace Obd2Net.Protocols.Can
 
 
             // read header information
-            if (_idBits == 11)
+            if (IdBits == 11)
             {
                 // Ex.
                 //       [   ]

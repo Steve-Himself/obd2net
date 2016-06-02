@@ -39,6 +39,7 @@
     <Compile Include="Commands.cs" />
     <Compile Include="Configuration\ObdBuilder.cs" />
     <Compile Include="Configuration\ObdBuilderConfiguration.cs" />
+    <Compile Include="Configuration\ObdConfiguration.cs" />
     <Compile Include="Decoders.cs" />
     <Compile Include="DecoderValue.cs" />
     <Compile Include="Enums\AirStatus.cs" />
@@ -81,6 +82,9 @@
       <Project>{CD1A8B19-621A-445E-B227-544EF86D3E56}</Project>
       <Name>Obd2Net.InfrastructureContracts</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Commands\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

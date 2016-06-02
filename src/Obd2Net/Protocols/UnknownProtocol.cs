@@ -5,11 +5,6 @@ namespace Obd2Net.Protocols
 {
     public class UnknownProtocol : ProtocolBase
     {
-        public UnknownProtocol()
-            : base(null)
-        {
-        }
-
         protected override int TxIdEngine => 0;
 
         public override string ElmName => "Unknown";
