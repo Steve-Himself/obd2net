@@ -1,6 +1,5 @@
 ﻿using System;
 using Obd2Net.InfrastructureContracts;
-using Obd2Net.InfrastructureContracts.DependencyInjection;
 using Obd2Net.InfrastructureContracts.Protocols;
 using Obd2Net.Protocols;
 
@@ -15,18 +14,18 @@ namespace Obd2Net.Configuration
             Config = new DefaultObdConfiguration();
         }
 
-        internal IDependencyResolver DependencyResolver { get; set; }
+        //internal IDependencyResolver DependencyResolver { get; set; }
         public ObdBuilderConfiguration WithDefaults()
         {
             // TODO: Add defaults
             return this;
         }
 
-        public ObdBuilderConfiguration WithDependencyResolver(IDependencyResolver dependencyResolver)
-        {
-            DependencyResolver = dependencyResolver;
-            return this;
-        }
+        //public ObdBuilderConfiguration WithDependencyResolver(IDependencyResolver dependencyResolver)
+        //{
+        //    DependencyResolver = dependencyResolver;
+        //    return this;
+        //}
 
         internal IProtocol Protocol { get; set; }
 

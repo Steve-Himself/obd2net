@@ -1,6 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Obd2Net.Infrastructure.Commands;
+using Obd2Net.InfrastructureContracts.Commands;
+using Obd2Net.InfrastructureContracts.Enums;
 
 namespace Obd2Net
 {
@@ -26,5 +27,21 @@ namespace Obd2Net
                 return false;
             return true;
         }
+
+        public Mode01 Mode1 { get; } = new Mode01();
+        public Mode02 Mode2 { get; } = new Mode02();
+
+        public class Mode01
+        {
+            protected virtual string Mode => "01";
+
+            public IOBDCommand<decimal> Speed => new OBDCommand<decimal>("Speed", "Speed", $"{Mode}0D", 1, Decoders.Speed, ECU.Engine, true);
+        }
+
+        public class Mode02 : Mode01
+        {
+            protected override string Mode => "02";
+        }
+
     }
 }

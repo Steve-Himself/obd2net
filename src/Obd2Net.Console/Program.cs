@@ -15,6 +15,8 @@ namespace Obd2Net.Console
             var config = new ObdConfiguration("COM3", 9600, TimeSpan.FromMilliseconds(500), true);
             var elm = new Elm327<ISO_15765_4_29bit_500k>(log, protocol, config);
             var obd = new Obd<ISO_15765_4_29bit_500k>(new NullLogger(), elm);
+            var x = obd.Query(obd.Commands.Mode1.Speed);
+            System.Console.WriteLine(x);
         }
     }
 }

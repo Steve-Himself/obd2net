@@ -297,7 +297,7 @@ namespace Obd2Net.Ports
             // splits into lines
             // removes empty lines
             // removes trailing spaces
-            return raw.Split(new[] {"\r\n"}, StringSplitOptions.RemoveEmptyEntries);
+            return raw.Split(new[] {"\r","\n"}, StringSplitOptions.RemoveEmptyEntries);
         }
 
         public void Dispose()

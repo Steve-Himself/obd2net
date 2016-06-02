@@ -1,7 +1,8 @@
 ﻿using System;
-using Obd2Net.Infrastructure.Response;
 using Obd2Net.InfrastructureContracts;
+using Obd2Net.InfrastructureContracts.Commands;
 using Obd2Net.InfrastructureContracts.Enums;
+using Obd2Net.InfrastructureContracts.Response;
 
 namespace Obd2Net.Infrastructure.Commands
 {
@@ -22,7 +23,7 @@ namespace Obd2Net.Infrastructure.Commands
         public string Description { get; set; }
         public string Command { get; set; }
         public int Bytes { get; set; }
-        public Func<IMessage[], DecoderValue<T>> Decoder { get; set; }
+        public Func<IMessage[], IDecoderValue<T>> Decoder { get; set; }
         public ECU Ecu { get; set; }
         public bool Fast { get; set; }
 

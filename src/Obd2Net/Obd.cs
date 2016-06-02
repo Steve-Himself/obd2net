@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
-using Obd2Net.Infrastructure.Commands;
 using Obd2Net.Infrastructure.Response;
 using Obd2Net.InfrastructureContracts;
+using Obd2Net.InfrastructureContracts.Commands;
 using Obd2Net.InfrastructureContracts.Enums;
 using Obd2Net.InfrastructureContracts.Protocols;
+using Obd2Net.InfrastructureContracts.Response;
 using Obd2Net.Ports;
 
 namespace Obd2Net
