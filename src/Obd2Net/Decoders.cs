@@ -188,11 +188,11 @@ namespace Obd2Net
             return new DecoderValue<decimal>(v, Unit.Rpm);
         }
 
-        public static DecoderValue<decimal> Speed(params IMessage[] messages)
+        public static DecoderValue<uint> Speed(params IMessage[] messages)
         {
             var d = messages[0].Data;
-            var v = Utils.BytesToInt(d)*1.0m;
-            return new DecoderValue<decimal>(v, Unit.Kph);
+            var v = Convert.ToUInt32(Utils.BytesToInt(d));
+            return new DecoderValue<uint>(v, Unit.Kph);
         }
 
         public static DecoderValue<decimal> Timing_advance(params IMessage[] messages)
@@ -359,6 +359,11 @@ namespace Obd2Net
             var v = Utils.BytesToInt(d)*0.05m;
 
             return new DecoderValue<decimal>(decimal.Round(v, 2), Unit.Lph);
+        }
+
+        public static DecoderValue<string> RawString(params IMessage[] messages)
+        {
+            return new DecoderValue<string>(string.Join("\n", messages.Select(m => m.Raw).ToArray()), Unit.None);
         }
     }
 }

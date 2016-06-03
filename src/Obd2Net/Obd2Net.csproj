@@ -50,10 +50,13 @@
     <Compile Include="Extensions\EnumExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Frame.cs" />
+    <Compile Include="ICommands.cs" />
+    <Compile Include="Infrastructure\Commands\BaseCommand.cs" />
+    <Compile Include="Infrastructure\Commands\FuelPressure.cs" />
+    <Compile Include="Infrastructure\Commands\Speed.cs" />
     <Compile Include="Logging\NullLogger.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="Obd.cs" />
-    <Compile Include="Infrastructure\Commands\OBDCommand.cs" />
     <Compile Include="Infrastructure\Response\OBDResponse.cs" />
     <Compile Include="Ports\ELM327.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

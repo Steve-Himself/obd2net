@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using Obd2Net.InfrastructureContracts.Enums;
 
 namespace Obd2Net.InfrastructureContracts.Protocols
 {
@@ -6,9 +8,10 @@ namespace Obd2Net.InfrastructureContracts.Protocols
     {
         string ElmName { get; }
         string ElmId { get; }
+        IDictionary<int, ECU> EcuMap { get; }
         bool ParseFrame(IFrame frame);
         bool ParseMessage(IMessage message);
         IMessage[] Parse(params string[] lines);
-        void PopulateEcuMap(IMessage[] messages);
+        void PopulateEcuMap(params string[] messages);
     }
 }

@@ -11,8 +11,7 @@ namespace Obd2Net.Protocols
     {
         private const string Space = " ";
 
-        //public IMessage[] Messages { get; protected set; }
-        private readonly Dictionary<int, ECU> _ecuMap = new Dictionary<int, ECU>();
+        public IDictionary<int, ECU> EcuMap { get; private set; } = new Dictionary<int, ECU>();
 
         protected abstract int TxIdEngine { get; }
 
@@ -76,7 +75,7 @@ namespace Obd2Net.Protocols
                 if (ParseMessage(message))
                 {
                     //# mark with the appropriate ECU ID
-                    message.Ecu = _ecuMap[ecu.Key];
+                    message.Ecu = EcuMap.ContainsKey(ecu.Key) ? EcuMap[ecu.Key] : ECU.Unknown;
                     messages.Add(message);
                 }
             }
@@ -88,11 +87,15 @@ namespace Obd2Net.Protocols
                 //# messages are ECU.UNKNOWN by default
                 messages.Add(new Message(new Frame(line)));
             }
+
             return messages.ToArray();
         }
 
-        public void PopulateEcuMap(IMessage[] messages)
+        public void PopulateEcuMap(params string[] lines)
         {
+            var messages = Parse(lines);
+            EcuMap = new Dictionary<int, ECU>();
+
             //  filter out messages that don't contain any data
             //  this will prevent ELM responses from being mapped to ECUs
             messages = messages.Where(m => m.Parsed && m.TxId.HasValue).ToArray();
@@ -104,7 +107,7 @@ namespace Obd2Net.Protocols
             if (messages.Length == 1 && messages[0].TxId.HasValue)
             {
                 //  if there's only one response, mark it as the engine regardless
-                _ecuMap[messages[0].TxId.Value] = ECU.Engine;
+                EcuMap[messages[0].TxId.Value] = ECU.Engine;
                 return;
             }
 
@@ -117,7 +120,7 @@ namespace Obd2Net.Protocols
             {
                 if (!m.TxId.HasValue || m.TxId != TxIdEngine) continue;
 
-                _ecuMap[m.TxId.Value] = ECU.Engine;
+                EcuMap[m.TxId.Value] = ECU.Engine;
                 foundEngine = true;
                 //  TODO: program more of these when we figure out their constants
                 //  elif m.TxId == TX_ID_TRANSMISSION:
@@ -140,13 +143,13 @@ namespace Obd2Net.Protocols
                     best = bits;
                     txId = message.TxId.Value;
                 }
-                _ecuMap[txId] = ECU.Engine;
+                EcuMap[txId] = ECU.Engine;
             }
             //  any remaining TxIds are unknown
             foreach (var m in messages)
             {
-                if (m.TxId.HasValue && _ecuMap.ContainsKey(m.TxId.Value))
-                    _ecuMap[m.TxId.Value] = ECU.Unknown;
+                if (m.TxId.HasValue && EcuMap.ContainsKey(m.TxId.Value))
+                    EcuMap[m.TxId.Value] = ECU.Unknown;
             }
         }
     }

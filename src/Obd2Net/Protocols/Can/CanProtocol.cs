@@ -84,7 +84,7 @@ namespace Obd2Net.Protocols.Can
             // extract the frame data
             //             [      Frame       ]
             // 00 00 07 E8 06 41 00 BE 7F B8 13
-            //frame.Data = raw_bytes[4:]
+            frame.Data = rawBytes.Skip(4).ToArray();
 
 
             // read PCI byte (always first byte in the data section)
@@ -135,8 +135,7 @@ namespace Obd2Net.Protocols.Can
                 //             [      Frame       ]
                 //                [     Data      ]
                 // 00 00 07 E8 06 41 00 BE 7F B8 13 xx xx xx xx, anything else is ignored
-
-                Array.Copy(frame.Data, 1, message.Data, 0, 1 + frame.DataLen);
+                message.Data = frame.Data.Skip(1).ToArray();
             }
             else
             {

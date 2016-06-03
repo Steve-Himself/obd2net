@@ -1,55 +1,53 @@
 ﻿using System.Collections.Generic;
-using Obd2Net.Infrastructure.Response;
+using System.Linq;
 using Obd2Net.InfrastructureContracts;
 using Obd2Net.InfrastructureContracts.Commands;
 using Obd2Net.InfrastructureContracts.Enums;
-using Obd2Net.InfrastructureContracts.Protocols;
-using Obd2Net.InfrastructureContracts.Response;
-using Obd2Net.Ports;
 
 namespace Obd2Net
 {
-    public sealed class Obd<TProtocol> where TProtocol : IProtocol
+    public sealed class Obd
     {
+        private readonly object _syncLock = new object();
         private readonly ILogger _logger;
         private string _lastCommand;
 
         private IPort _port;
-        private List<IOBDCommand> _supportedCommands;
+        private readonly ICommands _commands;
+        private List<IOBDCommand> _supportedCommands = new List<IOBDCommand>();
 
-        internal Obd(ILogger logger, Elm327<TProtocol> port)
+        internal Obd(ILogger logger, IPort port, ICommands commands)
         {
-            Commands = new Commands();
-            _supportedCommands = Commands.BaseCommands();
             _logger = logger;
             _port = port;
+            _commands = commands;
 
             Connect(); // initialize by connecting and loading sensors
             LoadCommands(); // try to load the car's supported commands
         }
-
-        public Commands Commands { get; }
 
         /// <summary>
         ///     returns the OBD connection status
         /// </summary>
         public OBDStatus Status => _port?.Status ?? OBDStatus.NotConnected;
 
-        public IOBDResponse<T> Query<T>(IOBDCommand<T> cmd, bool force = false)
+        public IDecoderValue<TResult> Query<TResult>(IOBDCommand<TResult> cmd, bool force = false)
         {
+            lock (_syncLock)
+            {
                 //primary API function. Sends commands to the car, and
                 //protects against sending unsupported commands.
 
                 if (Status == OBDStatus.NotConnected)
                 {
                     _logger.Error("Query failed, no connection available");
-                    return new OBDResponse<T>();
+                    return DecoderValue<TResult>.Empty;
                 }
 
                 if (!force && !Supports(cmd))
                 {
                     _logger.Error($"'{cmd}' is not supported");
-                    return new OBDResponse<T>();
+                    return DecoderValue<TResult>.Empty;
                 }
 
                 // send command and retrieve message
@@ -64,9 +62,24 @@ namespace Obd2Net
                 if (messages == null || messages.Length == 0)
                 {
                     _logger.Error("No valid OBD Messages returned");
-                    return new OBDResponse<T>();
+                    return DecoderValue<TResult>.Empty;
                 }
-                return cmd.Execute(messages); // compute a response object
+
+                // Trim bytes based on cmd.Bytes size
+                foreach (var message in messages)
+                {
+                    message.Data = message.Data.Take(cmd.Bytes).ToArray();
+                }
+
+                return cmd.Decoder(messages);
+            }
+        }
+
+        public IDecoderValue<TResult> Query<TCommand, TResult>(bool force = false)
+            where TCommand : IOBDCommand<TResult>
+        {
+            var cmd = _commands.Get<TCommand, TResult>();
+            return Query(cmd, force);
         }
 
         public bool Supports(IOBDCommand cmd)
@@ -84,7 +97,7 @@ namespace Obd2Net
             // only wait for as many ECUs as we've seen
             if (_port.Config.Fast && cmd.Fast)
             {
-                cmdString += _port.Ecus.Length.ToString(); // TODO: ?? str(len(self.port.ecus()));
+                cmdString += _port.Ecus.Count().ToString(); // TODO: ?? str(len(self.port.ecus()));
             }
 
             // if we sent this last time, just send
@@ -101,12 +114,15 @@ namespace Obd2Net
         /// </summary>
         private void Connect()
         {
-            _port.Connect();
-            // if the connection failed, close it
-            if (_port.Status == OBDStatus.NotConnected)
+            lock (_syncLock)
             {
-                // the ELM327 class will report its own errors
-                Close();
+                _port.Connect();
+                // if the connection failed, close it
+                if (_port.Status == OBDStatus.NotConnected)
+                {
+                    // the ELM327 class will report its own errors
+                    Close();
+                }
             }
         }
 
@@ -115,13 +131,16 @@ namespace Obd2Net
         /// </summary>
         private void Close()
         {
-            _supportedCommands = new List<IOBDCommand>();
-
-            if (_port != null)
+            lock (_syncLock)
             {
-                _logger.Info("Closing connection");
-                _port.Close();
-                _port = null;
+                _supportedCommands = new List<IOBDCommand>();
+
+                if (_port != null)
+                {
+                    _logger.Info("Closing connection");
+                    _port.Close();
+                    _port = null;
+                }
             }
         }
 
@@ -130,50 +149,54 @@ namespace Obd2Net
         /// </summary>
         private void LoadCommands()
         {
-            if (Status != OBDStatus.CarConnected)
+            lock (_syncLock)
             {
-                _logger.Debug("Cannot load commands: No connection to car");
-                return;
-            }
 
-            _logger.Debug("querying for supported PIDs (commands)...");
-            var pidGetters = Commands.PidGetters();
-            foreach (var get in pidGetters)
-            {
-                // PID listing commands should sequentialy become supported
-                // Mode 1 PID 0 is assumed to always be supported
-                if (!Supports(get)) continue;
-
-                // when querying, only use the blocking OBD.query()
-                // prevents problems when query is redefined in a subclass (like Async)
-                var response = Query(get, true); // ask nicely
-
-                if (response == null) continue;
-
-                var supported = response.Value; // string of binary 01010101010101
-
-                // loop through PIDs binary
-                for (var i = 0; i < supported.Length; i++)
+                if (Status != OBDStatus.CarConnected)
                 {
-                    if (supported[i] == '1')
+                    _logger.Debug("Cannot load commands: No connection to car");
+                    return;
+                }
+
+                _logger.Debug("querying for supported PIDs (commands)...");
+                var pidGetters = _commands.PidGetters();
+                foreach (var get in pidGetters)
+                {
+                    // PID listing commands should sequentialy become supported
+                    // Mode 1 PID 0 is assumed to always be supported
+                    if (!Supports(get)) continue;
+
+                    // when querying, only use the blocking OBD.query()
+                    // prevents problems when query is redefined in a subclass (like Async)
+                    var response = Query(get, true); // ask nicely
+
+                    if (response == null) continue;
+
+                    var supported = response.Value; // string of binary 01010101010101
+
+                    // loop through PIDs binary
+                    for (var i = 0; i < supported.Length; i++)
                     {
-                        var mode = get.Mode;
-                        var pid = get.Pid + i + 1;
-
-                        if (Commands.HasPid(mode, pid))
+                        if (supported[i] == '1')
                         {
-                            _supportedCommands.Add(Commands[mode][pid]);
-                        }
+                            var mode = get.Mode;
+                            var pid = get.Pid + i + 1;
 
-                        // set support for mode 2 commands
-                        if (mode == 1 && Commands.HasPid(2, pid))
-                        {
-                            _supportedCommands.Add(Commands[2][pid]);
+                            if (_commands.HasPid(mode, pid))
+                            {
+                                _supportedCommands.Add(_commands.Get(mode, pid));
+                            }
+
+                            // set support for mode 2 commands
+                            if (mode == 1 && _commands.HasPid(2, pid))
+                            {
+                                _supportedCommands.Add(_commands.Get(2, pid));
+                            }
                         }
                     }
                 }
+                _logger.Debug($"finished querying with {_supportedCommands.Count} commands supported");
             }
-            _logger.Debug($"finished querying with {_supportedCommands.Count} commands supported");
         }
     }
 }

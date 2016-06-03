@@ -2,9 +2,14 @@
 
 namespace Obd2Net.InfrastructureContracts
 {
-    public interface IDecoderValue<T>
+    public interface IDecoderValue
     {
         Unit Unit { get; }
+        object Raw { get; }
+
+    }
+    public interface IDecoderValue<out T> : IDecoderValue
+    {
         T Value { get; }
     }
 }
