@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Obd2Net.Extensions
 {
@@ -21,6 +22,11 @@ namespace Obd2Net.Extensions
             while (enumerator.MoveNext())
             {
             }
+        }
+
+        internal static IEnumerable<T> DistinctBy<T>(this IEnumerable<T> source, Func<T, object> key)
+        {
+            return source.GroupBy(key).Select(g => g.First());
         }
     }
 }

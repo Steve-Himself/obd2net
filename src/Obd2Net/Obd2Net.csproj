@@ -54,7 +54,9 @@
     <Compile Include="Infrastructure\Commands\BaseCommand.cs" />
     <Compile Include="Infrastructure\Commands\FuelPressure.cs" />
     <Compile Include="Infrastructure\Commands\Speed.cs" />
+    <Compile Include="Logging\ConsoleLogger.cs" />
     <Compile Include="Logging\NullLogger.cs" />
+    <Compile Include="Logging\TraceLogger.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="Obd.cs" />
     <Compile Include="Infrastructure\Response\OBDResponse.cs" />

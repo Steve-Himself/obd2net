@@ -14,7 +14,7 @@ namespace Obd2Net.Console
     {
         static void Main(string[] args)
         {
-            var log = new NullLogger();
+            var log = new ConsoleLogger();
             var protocol = new ISO_15765_4_29bit_500k();
             var config = new ObdConfiguration("COM3", 9600, TimeSpan.FromMilliseconds(500), true);
             var elm = new Elm327<ISO_15765_4_29bit_500k>(log, protocol, config);
@@ -26,21 +26,12 @@ namespace Obd2Net.Console
             var fuelPressureCmd = new FuelPressure();
 
             Observable
-                .Interval(TimeSpan.FromMilliseconds(60))
-                .Subscribe(
-                    x =>
-                {
-                    var speed = obd.Query(speedCmd, true);
-                    subject.OnNext(speed);
-                });
+                .Interval(TimeSpan.FromSeconds(1))
+                .Subscribe(x => subject.OnNext(obd.Query(speedCmd, true)));
+
             Observable
-                .Interval(TimeSpan.FromMilliseconds(60))
-                .Subscribe(
-                    x =>
-                    {
-                        var val = obd.Query(fuelPressureCmd, true);
-                        subject.OnNext(val);
-                    });
+                .Interval(TimeSpan.FromSeconds(5))
+                .Subscribe(x => subject.OnNext(obd.Query(fuelPressureCmd, true)));
 
             subject.DistinctUntilChanged(x => x).Subscribe(System.Console.WriteLine);
 
