@@ -4,12 +4,17 @@ using Obd2Net.InfrastructureContracts.Enums;
 
 namespace Obd2Net.InfrastructureContracts.Response
 {
-    public interface IOBDResponse<T>
+    public interface IOBDResponse
     {
-        IOBDCommand<T> Command { get; }
-        IMessage[] Messages { get; }
-        T Value { get; set; }
-        Unit Unit { get; set; }
         DateTime Time { get; set; }
+        IMessage[] Messages { get; set; }
+        Unit Unit { get; set; }
+        object Raw { get; }
+        IOBDCommand Command { get; set; }
+    }
+
+    public interface IOBDResponse<T> : IOBDResponse
+    {
+        T Value { get; set; }
     }
 }

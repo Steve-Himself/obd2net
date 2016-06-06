@@ -1,11 +1,12 @@
 ﻿using System;
 using Obd2Net.InfrastructureContracts.Enums;
+using Obd2Net.InfrastructureContracts.Response;
 
 namespace Obd2Net.InfrastructureContracts.Commands
 {
     public interface IOBDCommand<T> : IOBDCommand
     {
-        Func<IMessage[], IDecoderValue<T>> Decoder { get; }
+        Func<IMessage[], IOBDResponse<T>> Decoder { get; }
     }
 
     public interface IOBDCommand
@@ -18,11 +19,5 @@ namespace Obd2Net.InfrastructureContracts.Commands
         bool Fast { get; }
         int Mode { get; }
         int Pid { get; }
-    }
-
-    public interface IMode1OBDCommand { }
-
-    public interface IPidOBDCommand
-    {
     }
 }

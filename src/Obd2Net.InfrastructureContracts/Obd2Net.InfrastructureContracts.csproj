@@ -42,7 +42,6 @@
     <Compile Include="Commands\IOBDCommand.cs" />
     <Compile Include="Enums\ECU.cs" />
     <Compile Include="Enums\Unit.cs" />
-    <Compile Include="IDecoderValue.cs" />
     <Compile Include="IFrame.cs" />
     <Compile Include="ILogger.cs" />
     <Compile Include="IMessage.cs" />

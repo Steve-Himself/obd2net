@@ -8,7 +8,7 @@ namespace Obd2Net.Infrastructure.Commands
 {
     internal class OBDCommand<T> : IOBDCommand<T>
     {
-        internal OBDCommand(string name, string description, string command, int bytes, Func<IMessage[], DecoderValue<T>> decoder, ECU ecu = ECU.All, bool fast = false)
+        internal OBDCommand(string name, string description, string command, int bytes, Func<IMessage[], IOBDResponse<T>> decoder, ECU ecu = ECU.All, bool fast = false)
         {
             Name = name;
             Description = description;
@@ -23,7 +23,7 @@ namespace Obd2Net.Infrastructure.Commands
         public string Description { get; set; }
         public string Command { get; set; }
         public int Bytes { get; set; }
-        public Func<IMessage[], IDecoderValue<T>> Decoder { get; set; }
+        public Func<IMessage[], IOBDResponse<T>> Decoder { get; set; }
         public ECU Ecu { get; set; }
         public bool Fast { get; set; }
 

@@ -9,20 +9,24 @@ namespace Obd2Net.Infrastructure.Response
 {
     internal class OBDResponse<T> : IOBDResponse<T>
     {
-        internal OBDResponse(IOBDCommand<T> command = null, params IMessage[] messages)
+        internal static IOBDResponse<T> Empty { get; } = new OBDResponse<T>(default(T), Unit.None);
+
+        internal OBDResponse(T value, Unit unit)
         {
-            Command = command;
-            Messages = messages ?? new IMessage[0];
+            Value = value;
+            Unit = unit;
         }
 
-        public IOBDCommand<T> Command { get; }
-        public IMessage[] Messages { get; }
+        public IOBDCommand Command { get; set; }
+        public IMessage[] Messages { get; set; }
         public T Value { get; set; }
         public Unit Unit { get; set; }
         public DateTime Time { get; set; }
+        public object Raw => Value;
+
         public override string ToString()
         {
-            return $"{Value} {Unit.GetDescription()}";
+            return $"{Command?.Name ?? "Empty"}: {Value} {Unit.GetDescription()}";
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -26,6 +27,11 @@ namespace Obd2Net
         public static int BytesToInt(byte[] bytes)
         {
             return int.Parse(BitConverter.ToString(bytes, 0).Replace(HexSeperator, string.Empty), NumberStyles.AllowHexSpecifier);
+        }
+
+        public static string BytesToBits(IEnumerable<byte> bytes)
+        {
+            return string.Join("", bytes.Select(b => Convert.ToString(b, 2).PadLeft(8, '0')));
         }
 
         public static int BytesToInt(byte[] bytes, int start, int? length = null)

@@ -1,37 +1,60 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Obd2Net.Infrastructure.Commands;
+using Obd2Net.Infrastructure.Query;
 using Obd2Net.InfrastructureContracts.Commands;
-using Obd2Net.InfrastructureContracts.Enums;
 
 namespace Obd2Net
 {
-    public class Commands : ICommands
+    public static class Commands
     {
-        private readonly IEnumerable<IOBDCommand> _commands;
+        public static Mode1 Mode1 { get; } = new Mode1();
+        public static Mode2 Mode2 { get; } = new Mode2();
+        public static Mode3 Mode3 { get; } = new Mode3();
+        public static Mode4 Mode4 { get; } = new Mode4();
+        public static Mode7 Mode7 { get; } = new Mode7();
+        public static Misc Misc { get; } = new Misc();
 
-        public Commands(IEnumerable<IOBDCommand> commands)
+        static Commands()
         {
-            _commands = commands;
+            All.AddRange(Mode1.Commands);
+            All.AddRange(Mode2.Commands);
+            All.AddRange(Mode3.Commands);
+            All.AddRange(Mode4.Commands);
+            All.AddRange(Mode7.Commands);
+            All.AddRange(Misc.Commands);
         }
 
-        public IEnumerable<IOBDCommand<string>> PidGetters()
+        public static List<IOBDCommand> All { get; } = new List<IOBDCommand>();
+
+        public static IOBDCommand[] BaseCommands => new IOBDCommand[]
         {
-            return _commands.OfType<IPidOBDCommand>().OfType<IOBDCommand<string>>();
+            Mode1.PidsA,
+            Mode3.GetDtc,
+            Mode4.ClearDtc,
+            Mode7.GetFreezeDtc,
+            Misc.ElmVersion,
+            Misc.ElmVoltage
+        };
+
+        public static IEnumerable<IOBDCommand<string>> PidGetters()
+        {
+            return All.OfType<PidCommand>();
         }
 
-        public IOBDCommand Get(int mode, int pid)
+        public static IOBDCommand Get(int mode, int pid)
         {
-            return _commands.FirstOrDefault(c => c.Mode == mode && c.Pid == pid);
+            return All.FirstOrDefault(c => c.Mode == mode && c.Pid == pid);
         }
 
-        public IOBDCommand<TResult> Get<TCommand, TResult>() where TCommand : IOBDCommand<TResult>
+        public static IOBDCommand<TResult> Get<TCommand, TResult>() where TCommand : IOBDCommand<TResult>
         {
-            return _commands.OfType<TCommand>().FirstOrDefault();
+            return All.OfType<TCommand>().FirstOrDefault();
         }
 
-        public bool HasPid(int mode, int pid)
+        public static bool HasPid(int mode, int pid)
         {
-            return _commands.Any(c => c.Mode == mode && c.Pid == pid);
-        }       
+            return All.Any(c => c.Mode == mode && c.Pid == pid);
+        }
     }
 }

@@ -1,8 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Obd2Net.Infrastructure.Response;
 using Obd2Net.InfrastructureContracts;
 using Obd2Net.InfrastructureContracts.Commands;
 using Obd2Net.InfrastructureContracts.Enums;
+using Obd2Net.InfrastructureContracts.Response;
 
 namespace Obd2Net
 {
@@ -11,16 +14,13 @@ namespace Obd2Net
         private readonly object _syncLock = new object();
         private readonly ILogger _logger;
         private string _lastCommand;
-
         private IPort _port;
-        private readonly ICommands _commands;
-        private List<IOBDCommand> _supportedCommands = new List<IOBDCommand>();
+        private List<IOBDCommand> _supportedCommands = new List<IOBDCommand>(Commands.BaseCommands);
 
-        internal Obd(ILogger logger, IPort port, ICommands commands)
+        internal Obd(ILogger logger, IPort port)
         {
             _logger = logger;
             _port = port;
-            _commands = commands;
 
             Connect(); // initialize by connecting and loading sensors
             LoadCommands(); // try to load the car's supported commands
@@ -31,7 +31,7 @@ namespace Obd2Net
         /// </summary>
         public OBDStatus Status => _port?.Status ?? OBDStatus.NotConnected;
 
-        public IDecoderValue<TResult> Query<TResult>(IOBDCommand<TResult> cmd, bool force = false)
+        internal IOBDResponse<TResult> PerformQuery<TResult>(IOBDCommand<TResult> cmd, bool force = false)
         {
             lock (_syncLock)
             {
@@ -41,13 +41,13 @@ namespace Obd2Net
                 if (Status == OBDStatus.NotConnected)
                 {
                     _logger.Error("Query failed, no connection available");
-                    return DecoderValue<TResult>.Empty;
+                    return OBDResponse<TResult>.Empty;
                 }
 
                 if (!force && !Supports(cmd))
                 {
                     _logger.Error($"'{cmd}' is not supported");
-                    return DecoderValue<TResult>.Empty;
+                    return OBDResponse<TResult>.Empty;
                 }
 
                 // send command and retrieve message
@@ -62,7 +62,7 @@ namespace Obd2Net
                 if (messages == null || messages.Length == 0)
                 {
                     _logger.Error("No valid OBD Messages returned");
-                    return DecoderValue<TResult>.Empty;
+                    return OBDResponse<TResult>.Empty;
                 }
 
                 // Trim bytes based on cmd.Bytes size
@@ -71,15 +71,18 @@ namespace Obd2Net
                     message.Data = message.Data.Take(cmd.Bytes).ToArray();
                 }
 
-                return cmd.Decoder(messages);
+                var result = cmd.Decoder(messages);
+                result.Messages = messages;
+                result.Time = DateTime.UtcNow;
+                result.Command = cmd;
+                return result;
             }
         }
 
-        public IDecoderValue<TResult> Query<TCommand, TResult>(bool force = false)
-            where TCommand : IOBDCommand<TResult>
+        public IOBDResponse<TResult> Query<TResult>(IOBDCommand<TResult> cmd, bool force = false)
         {
-            var cmd = _commands.Get<TCommand, TResult>();
-            return Query(cmd, force);
+            //var cmd = _commands.Get<TCommand, TResult>();
+            return PerformQuery(cmd, force);
         }
 
         public bool Supports(IOBDCommand cmd)
@@ -97,7 +100,7 @@ namespace Obd2Net
             // only wait for as many ECUs as we've seen
             if (_port.Config.Fast && cmd.Fast)
             {
-                cmdString += _port.Ecus.Count().ToString(); // TODO: ?? str(len(self.port.ecus()));
+                cmdString += _port.Ecus.Count().ToString(); // TODO: ?? Check this syntax on multi ecu's
             }
 
             // if we sent this last time, just send
@@ -159,16 +162,14 @@ namespace Obd2Net
                 }
 
                 _logger.Debug("querying for supported PIDs (commands)...");
-                var pidGetters = _commands.PidGetters();
+                var pidGetters = Commands.PidGetters();
                 foreach (var get in pidGetters)
                 {
                     // PID listing commands should sequentialy become supported
                     // Mode 1 PID 0 is assumed to always be supported
                     if (!Supports(get)) continue;
 
-                    // when querying, only use the blocking OBD.query()
-                    // prevents problems when query is redefined in a subclass (like Async)
-                    var response = Query(get, true); // ask nicely
+                    var response = PerformQuery(get, true);
 
                     if (response == null) continue;
 
@@ -182,15 +183,15 @@ namespace Obd2Net
                             var mode = get.Mode;
                             var pid = get.Pid + i + 1;
 
-                            if (_commands.HasPid(mode, pid))
+                            if (Commands.HasPid(mode, pid))
                             {
-                                _supportedCommands.Add(_commands.Get(mode, pid));
+                                _supportedCommands.Add(Commands.Get(mode, pid));
                             }
 
                             // set support for mode 2 commands
-                            if (mode == 1 && _commands.HasPid(2, pid))
+                            if (mode == 1 && Commands.HasPid(2, pid))
                             {
-                                _supportedCommands.Add(_commands.Get(2, pid));
+                                _supportedCommands.Add(Commands.Get(2, pid));
                             }
                         }
                     }
