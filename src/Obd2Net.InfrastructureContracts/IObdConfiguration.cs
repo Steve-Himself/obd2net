@@ -2,7 +2,7 @@
 
 namespace Obd2Net.InfrastructureContracts
 {
-    public interface IObdConfiguration
+    public interface IOBDConfiguration
     {
         int Baudrate { get; }
         string Portname { get; }

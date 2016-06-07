@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Obd2Net.InfrastructureContracts.Enums;
 
 namespace Obd2Net.InfrastructureContracts.Protocols

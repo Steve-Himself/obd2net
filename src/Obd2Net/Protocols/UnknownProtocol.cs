@@ -1,5 +1,5 @@
 ﻿using System;
-using Obd2Net.InfrastructureContracts;
+using Obd2Net.InfrastructureContracts.Protocols;
 
 namespace Obd2Net.Protocols
 {

@@ -3,13 +3,13 @@ using Obd2Net.InfrastructureContracts;
 
 namespace Obd2Net.Configuration
 {
-    public class ObdConfiguration : IObdConfiguration
+    public class OBDConfiguration : IOBDConfiguration
     {
-        public ObdConfiguration()
+        public OBDConfiguration()
         {
         }
 
-        public ObdConfiguration(string portname, int baudrate, TimeSpan timeout, bool fast = true)
+        public OBDConfiguration(string portname, int baudrate, TimeSpan timeout, bool fast = true)
         {
             Portname = portname;
             Baudrate = baudrate;
@@ -23,7 +23,7 @@ namespace Obd2Net.Configuration
         public int Baudrate { get; set; }
     }
 
-    public class DefaultObdConfiguration : IObdConfiguration
+    public class DefaultOBDConfiguration : IOBDConfiguration
     {
         public int Baudrate => 9600;
         public string Portname => "COM1";

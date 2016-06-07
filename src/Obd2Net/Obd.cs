@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Obd2Net.Infrastructure.Response;
+using Obd2Net.Infrastructure;
 using Obd2Net.InfrastructureContracts;
 using Obd2Net.InfrastructureContracts.Commands;
 using Obd2Net.InfrastructureContracts.Enums;

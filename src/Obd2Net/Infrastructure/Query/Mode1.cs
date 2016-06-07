@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Obd2Net.Infrastructure.Commands;
 using Obd2Net.InfrastructureContracts.Commands;
 using Obd2Net.InfrastructureContracts.Enums;
 

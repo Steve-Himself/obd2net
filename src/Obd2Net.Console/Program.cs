@@ -2,8 +2,6 @@
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Obd2Net.Configuration;
-using Obd2Net.Infrastructure.Commands;
-using Obd2Net.InfrastructureContracts;
 using Obd2Net.InfrastructureContracts.Response;
 using Obd2Net.Logging;
 using Obd2Net.Ports;
@@ -17,8 +15,8 @@ namespace Obd2Net.Console
         {
             var log = new ConsoleLogger();
             var protocol = new ISO_15765_4_29bit_500k();
-            var config = new ObdConfiguration("COM3", 9600, TimeSpan.FromMilliseconds(500), true);
-            var elm = new Elm327<ISO_15765_4_29bit_500k>(log, protocol, config);
+            var config = new OBDConfiguration("COM3", 9600, TimeSpan.FromMilliseconds(500), true);
+            var elm = new Elm327(log, protocol, config);
             
             var obd = new Obd(new NullLogger(), elm);
             

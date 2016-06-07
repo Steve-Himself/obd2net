@@ -1,6 +1,4 @@
-﻿using Obd2Net.InfrastructureContracts;
-
-namespace Obd2Net.Protocols.Can
+﻿namespace Obd2Net.Protocols.Can
 {
     // ReSharper disable once InconsistentNaming
     public class SAE_J1939 : CanProtocol

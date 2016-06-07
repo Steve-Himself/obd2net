@@ -1,6 +1,7 @@
 ﻿using System;
 using Obd2Net.InfrastructureContracts.Commands;
 using Obd2Net.InfrastructureContracts.Enums;
+using Obd2Net.InfrastructureContracts.Protocols;
 
 namespace Obd2Net.InfrastructureContracts.Response
 {

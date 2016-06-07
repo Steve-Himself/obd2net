@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Obd2Net.Logging;
 
 namespace Obd2Net.Extensions
 {

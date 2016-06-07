@@ -14,5 +14,14 @@ namespace Obd2Net.Extensions
 
             return attribute != null ? attribute.Description : value.ToString();
         }
+
+        public static string GetOrder(this Enum value)
+        {
+            var fi = value.GetType().GetField(value.ToString());
+
+            var attribute = (DescriptionAttribute)fi.GetCustomAttributes(typeof(DescriptionAttribute), false).FirstOrDefault();
+
+            return attribute != null ? attribute.Description : value.ToString();
+        }
     }
 }

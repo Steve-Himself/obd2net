@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 
-namespace Obd2Net
+namespace Obd2Net.Protocols
 {
     public static class Codes
     {
-        public static readonly IDictionary<string, string> DTC = new Dictionary<string, string>
+        public static IDictionary<string, string> DTC { get; } = new Dictionary<string, string>
         {
             {"P0001", "Fuel Volume Regulator Control Circuit/Open"},
             {"P0002", "Fuel Volume Regulator Control Circuit Range/Performance"},
@@ -2073,102 +2073,6 @@ namespace Obd2Net
             {"U0430", "Invalid Data Received From Tire Pressure Monitor Module"},
             {"U0431", "Invalid Data Received From Body Control Module 'A'"}
         };
-
-        public static readonly List<string> IgnitionType = new List<string>
-        {
-            "Spark",
-            "Compression"
-        };
-
-        public static readonly List<string> SparkTests = new List<string>
-        {
-            "EGR System",
-            "Oxygen Sensor Heater",
-            "Oxygen Sensor",
-            "A/C Refrigerant",
-            "Secondary Air System",
-            "Evaporative System",
-            "Heated Catalyst",
-            "Catalyst"
-        };
-
-        public static readonly List<string> CompressionTests = new List<string>
-        {
-            "EGR and/or VVT System",
-            "PM filter monitoring",
-            "Exhaust Gas Sensor",
-            "None",
-            "Boost Pressure",
-            "None",
-            "NOx/SCR Monitor",
-            "NMHC Catalyst"
-        };
-
-
-        public static readonly List<string> OBDCompliance = new List<string>
-        {
-            "Undefined",
-            "OBD-II as defined by the CARB",
-            "OBD as defined by the EPA",
-            "OBD and OBD-II",
-            "OBD-I",
-            "Not OBD compliant",
-            "EOBD (Europe)",
-            "EOBD and OBD-II",
-            "EOBD and OBD",
-            "EOBD, OBD and OBD II",
-            "JOBD (Japan)",
-            "JOBD and OBD II",
-            "JOBD and EOBD",
-            "JOBD, EOBD, and OBD II",
-            "Reserved",
-            "Reserved",
-            "Reserved",
-            "Engine Manufacturer Diagnostics (EMD)",
-            "Engine Manufacturer Diagnostics Enhanced (EMD+)",
-            "Heavy Duty On-Board Diagnostics (Child/Partial) (HD OBD-C)",
-            "Heavy Duty On-Board Diagnostics (HD OBD)",
-            "World Wide Harmonized OBD (WWH OBD)",
-            "Reserved",
-            "Heavy Duty Euro OBD Stage I without NOx control (HD EOBD-I)",
-            "Heavy Duty Euro OBD Stage I with NOx control (HD EOBD-I N)",
-            "Heavy Duty Euro OBD Stage II without NOx control (HD EOBD-II)",
-            "Heavy Duty Euro OBD Stage II with NOx control (HD EOBD-II N)",
-            "Reserved",
-            "Brazil OBD Phase 1 (OBDBr-1)",
-            "Brazil OBD Phase 2 (OBDBr-2)",
-            "Korean OBD (KOBD)",
-            "India OBD I (IOBD I)",
-            "India OBD II (IOBD II)",
-            "Heavy Duty Euro OBD Stage VI (HD EOBD-IV)"
-        };
-
-        public static readonly List<string> FuelTypes = new List<string>
-        {
-            "Not available",
-            "Gasoline",
-            "Methanol",
-            "Ethanol",
-            "Diesel",
-            "LPG",
-            "CNG",
-            "Propane",
-            "Electric",
-            "Bifuel running Gasoline",
-            "Bifuel running Methanol",
-            "Bifuel running Ethanol",
-            "Bifuel running LPG",
-            "Bifuel running CNG",
-            "Bifuel running Propane",
-            "Bifuel running Electricity",
-            "Bifuel running electric and combustion engine",
-            "Hybrid gasoline",
-            "Hybrid Ethanol",
-            "Hybrid Diesel",
-            "Hybrid Electric",
-            "Hybrid running electric and combustion engine",
-            "Hybrid Regenerative",
-            "Bifuel running diesel"
-        };
+      
     }
 }

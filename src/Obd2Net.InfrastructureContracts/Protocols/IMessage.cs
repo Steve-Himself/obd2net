@@ -1,6 +1,6 @@
 ﻿using Obd2Net.InfrastructureContracts.Enums;
 
-namespace Obd2Net.InfrastructureContracts
+namespace Obd2Net.InfrastructureContracts.Protocols
 {
     public interface IMessage
     {

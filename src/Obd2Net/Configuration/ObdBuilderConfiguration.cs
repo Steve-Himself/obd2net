@@ -1,17 +1,16 @@
 ﻿using System;
 using Obd2Net.InfrastructureContracts;
 using Obd2Net.InfrastructureContracts.Protocols;
-using Obd2Net.Protocols;
 
 namespace Obd2Net.Configuration
 {
     public class ObdBuilderConfiguration
     {
-        internal IObdConfiguration Config { get; set; }
+        internal IOBDConfiguration Config { get; set; }
 
         internal ObdBuilderConfiguration()
         {
-            Config = new DefaultObdConfiguration();
+            Config = new DefaultOBDConfiguration();
         }
 
         //internal IDependencyResolver DependencyResolver { get; set; }
@@ -49,7 +48,7 @@ namespace Obd2Net.Configuration
             return this;
         }
 
-        public ObdBuilderConfiguration WithConfig(IObdConfiguration configuration)
+        public ObdBuilderConfiguration WithConfig(IOBDConfiguration configuration)
         {
             Config = configuration;
             return this;
@@ -57,19 +56,19 @@ namespace Obd2Net.Configuration
 
         public ObdBuilderConfiguration WithPort(string port)
         {
-            Config = new ObdConfiguration(port, Config.Baudrate, Config.Timeout, Config.Fast);
+            Config = new OBDConfiguration(port, Config.Baudrate, Config.Timeout, Config.Fast);
             return this;
         }
 
         public ObdBuilderConfiguration WithBaudrate(int baudrate)
         {
-            Config = new ObdConfiguration(Config.Portname, baudrate, Config.Timeout, Config.Fast);
+            Config = new OBDConfiguration(Config.Portname, baudrate, Config.Timeout, Config.Fast);
             return this;
         }
 
         public ObdBuilderConfiguration WithTimeout(TimeSpan timeout)
         {
-            Config = new ObdConfiguration(Config.Portname, Config.Baudrate, timeout, Config.Fast);
+            Config = new OBDConfiguration(Config.Portname, Config.Baudrate, timeout, Config.Fast);
             return this;
         }
     }

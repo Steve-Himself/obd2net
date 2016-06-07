@@ -3,9 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Obd2Net.Extensions;
-using Obd2Net.Infrastructure.Response;
-using Obd2Net.InfrastructureContracts;
+using Obd2Net.Infrastructure;
 using Obd2Net.InfrastructureContracts.Enums;
+using Obd2Net.InfrastructureContracts.Protocols;
+using Obd2Net.Protocols;
 
 namespace Obd2Net
 {
@@ -15,13 +16,13 @@ namespace Obd2Net
 
         public static OBDResponse<string> Pid(params IMessage[] messages)
         {
-            var d = messages.First().Data;
+            var d = messages[0].Data;
             return new OBDResponse<string>(Utils.BytesToBits(d), Unit.None);
         }
 
         public static OBDResponse<uint> Minutes(params IMessage[] messages)
         {
-            var data = messages.First().Data;
+            var data = messages[0].Data;
             var v = Convert.ToUInt32(Utils.BytesToInt(data));
             return new OBDResponse<uint>(v, Unit.Min);
         }
@@ -38,11 +39,12 @@ namespace Obd2Net
             var d = messages[0].Data;
             var bits = new BitArray(d);
 
+            var ignitionType = (IgnitionType) Utils.Unbin(bits, 12);
             var output = new Status
             {
                 Mil = bits[0],
                 DTCCount = Utils.Unbin(bits, 0, 7),
-                IgnitionType = Codes.IgnitionType[Utils.Unbin(bits, 12)]
+                IgnitionType = ignitionType.GetDescription()
             };
 
             output.Tests.Add(new Test("Misfire", bits[15], bits[11]));
@@ -53,29 +55,24 @@ namespace Obd2Net
 
 
             // different tests for different ignition types 
-            if (output.IgnitionType == Codes.IgnitionType[0])
+            if (ignitionType == IgnitionType.Spark)
             {
                 // spark
-                foreach (var i in Enumerable.Range(0, 7))
+                foreach (int i in Enum.GetValues(typeof(SparkTests)))
                 {
-                    if (Codes.SparkTests[i] == null) continue;
-
-                    var t = new Test(Codes.SparkTests[i], bits[2*8 + i], bits[3*8 + i]);
+                    var t = new Test(((SparkTests)i).GetDescription(), bits[2*8 + i], bits[3*8 + i]);
 
                     output.Tests.Add(t);
                 }
             }
-            else if (output.IgnitionType == Codes.IgnitionType[1])
+            else if (ignitionType == IgnitionType.Compression)
             {
                 // compression
-                foreach (var i in Enumerable.Range(0, 7))
+                foreach (int i in Enum.GetValues(typeof(CompressionTest)))
                 {
-                    if (Codes.CompressionTests[i] != null)
-                    {
-                        var t = new Test(Codes.CompressionTests[i], bits[2*8 + i], bits[3*8 + i]);
+                        var t = new Test(((CompressionTest)i).GetDescription(), bits[2*8 + i], bits[3*8 + i]);
 
                         output.Tests.Add(t);
-                    }
                 }
             }
 
@@ -245,23 +242,22 @@ namespace Obd2Net
             var d = messages[0].Data;
             var v = Utils.BytesToInt(d);
 
-            var s = "Error: Unknown OBD compliance response";
-            if (v >= 0 && v < Codes.OBDCompliance.Count)
-                s = Codes.OBDCompliance[v];
+            if (v <= 0 || !Enum.IsDefined(typeof(OBDCompliance), v))
+                return new OBDResponse<string>("Error: Unknown OBD compliance response", Unit.None);
 
-            return new OBDResponse<string>(s, Unit.None);
+            return new OBDResponse<string>(((OBDCompliance)v).GetDescription(), Unit.None);
         }
 
         public static OBDResponse<uint> Seconds(params IMessage[] messages)
         {
-            var data = messages.First().Data;
+            var data = messages[0].Data;
             var v = Convert.ToUInt32(Utils.BytesToInt(data));
             return new OBDResponse<uint>(v, Unit.Sec);
         }
 
         public static OBDResponse<uint> Distance(params IMessage[] messages)
         {
-            var data = messages.First().Data;
+            var data = messages[0].Data;
             var v = Convert.ToUInt32(Utils.BytesToInt(data));
             return new OBDResponse<uint>(v, Unit.Km);
         }
@@ -317,12 +313,10 @@ namespace Obd2Net
             var d = messages[0].Data;
             var v = (int) d[0];
 
-            var s = "Error: Unknown fuel type response";
+            if (v <= 0 || !Enum.IsDefined(typeof(FuelType), v))
+                return new OBDResponse<string>("Error: Unknown fuel type response", Unit.None);
 
-            if (v >= 0 && v < Codes.FuelTypes.Count)
-                s = Codes.FuelTypes[v];
-
-            return new OBDResponse<string>(s, Unit.None);
+            return new OBDResponse<string>(((FuelType)v).GetDescription(), Unit.None);
         }
 
         public static OBDResponse<decimal> Abs_evap_pressure(params IMessage[] messages)

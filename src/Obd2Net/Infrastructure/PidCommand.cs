@@ -1,6 +1,6 @@
 ﻿using Obd2Net.InfrastructureContracts.Enums;
 
-namespace Obd2Net.Infrastructure.Commands
+namespace Obd2Net.Infrastructure
 {
     internal class PidCommand : OBDCommand<string>
     {

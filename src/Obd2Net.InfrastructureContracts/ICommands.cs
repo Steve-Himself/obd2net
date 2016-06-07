@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Obd2Net.InfrastructureContracts.Commands;
 
-namespace Obd2Net
+namespace Obd2Net.InfrastructureContracts
 {
     public interface ICommands
     {

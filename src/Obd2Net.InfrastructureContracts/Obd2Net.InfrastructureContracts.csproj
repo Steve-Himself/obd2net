@@ -42,9 +42,10 @@
     <Compile Include="Commands\IOBDCommand.cs" />
     <Compile Include="Enums\ECU.cs" />
     <Compile Include="Enums\Unit.cs" />
-    <Compile Include="IFrame.cs" />
+    <Compile Include="ICommands.cs" />
+    <Compile Include="Protocols\IFrame.cs" />
     <Compile Include="ILogger.cs" />
-    <Compile Include="IMessage.cs" />
+    <Compile Include="Protocols\IMessage.cs" />
     <Compile Include="Enums\OBDStatus.cs" />
     <Compile Include="IObdConfiguration.cs" />
     <Compile Include="IPort.cs" />

@@ -1,4 +1,4 @@
-﻿namespace Obd2Net.InfrastructureContracts
+﻿namespace Obd2Net.InfrastructureContracts.Protocols
 {
     public interface IFrame
     {

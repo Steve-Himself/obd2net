@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using FluentAssertions;
 using NUnit.Framework;
-using Obd2Net.Infrastructure.Response;
-using Obd2Net.InfrastructureContracts;
+using Obd2Net.Infrastructure;
 using Obd2Net.InfrastructureContracts.Enums;
+using Obd2Net.InfrastructureContracts.Protocols;
 using Obd2Net.InfrastructureContracts.Response;
+using Obd2Net.Protocols;
 
 namespace Obd2Net.Tests
 {

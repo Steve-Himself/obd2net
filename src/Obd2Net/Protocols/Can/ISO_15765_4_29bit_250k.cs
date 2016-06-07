@@ -1,5 +1,3 @@
-using Obd2Net.InfrastructureContracts;
-
 namespace Obd2Net.Protocols.Can
 {
     // ReSharper disable once InconsistentNaming

@@ -7,7 +7,7 @@ namespace Obd2Net.InfrastructureContracts
 {
     public interface IPort
     {
-        IObdConfiguration Config { get; }
+        IOBDConfiguration Config { get; }
         OBDStatus Status { get; }
         IProtocol Protocol { get; }
         IEnumerable<ECU> Ecus { get; }

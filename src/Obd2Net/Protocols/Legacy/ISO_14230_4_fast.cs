@@ -1,6 +1,4 @@
-﻿using Obd2Net.InfrastructureContracts;
-
-namespace Obd2Net.Protocols.Legacy
+﻿namespace Obd2Net.Protocols.Legacy
 {
     // ReSharper disable once InconsistentNaming
     public class ISO_14230_4_fast : LegacyProtocol

@@ -10,27 +10,17 @@ using Obd2Net.InfrastructureContracts.Protocols;
 
 namespace Obd2Net.Ports
 {
-    internal class Elm327<TProtocol> : IPort where TProtocol : IProtocol
+    internal class Elm327 : IPort
     {
         private readonly ILogger _logger;
         private SerialPort _serialPort;
         private readonly object _syncLock = new object();
 
-        //private static readonly string[] TryProtocolOrder =
-        //{
-        //    "6", // ISO_15765_4_11bit_500k
-        //    "8", // ISO_15765_4_11bit_250k
-        //    "1", // SAE_J1850_PWM
-        //    "7", // ISO_15765_4_29bit_500k
-        //    "9", // ISO_15765_4_29bit_250k
-        //    "2", // SAE_J1850_VPW
-        //    "3", // ISO_9141_2
-        //    "4", // ISO_14230_4_5baud
-        //    "5", // ISO_14230_4_fast
-        //    "A" // SAE_J1939
-        //};
+        public Elm327(ILogger logger, IOBDConfiguration config) : this(logger, null, config)
+        {
+        }
 
-        public Elm327(ILogger logger, TProtocol protocol, ObdConfiguration config)
+        public Elm327(ILogger logger, IProtocol protocol, IOBDConfiguration config)
         {
             _logger = logger;
             Config = config;
@@ -38,9 +28,10 @@ namespace Obd2Net.Ports
         }
 
         public IProtocol Protocol { get; private set; }
+
         public IEnumerable<ECU> Ecus => Protocol.EcuMap.Values;
 
-        public IObdConfiguration Config { get; }
+        public IOBDConfiguration Config { get; }
 
         public OBDStatus Status { get; private set; }
 
@@ -107,7 +98,7 @@ namespace Obd2Net.Ports
         {
             lock (_syncLock)
             {
-                _serialPort = new SerialPort(Config.Portname, Config.Baudrate);
+                _serialPort = new SerialPort(portname, baudrate);
                 var timeout = Convert.ToInt32(Config.Timeout.TotalMilliseconds);
                 // ------------- open port -------------
                 try
@@ -209,14 +200,22 @@ namespace Obd2Net.Ports
         {
             lock (_syncLock)
             {
-                Send($"ATTP{Protocol.ElmId}");
-                var r0100 = Send("0100");
+                if (Protocol != null)
+                {
+                    Send($"ATTP{Protocol.ElmId}");
+                    var r0100 = Send("0100");
 
-                if (r0100.Any(m => m.Contains("UNABLE TO CONNECT"))) return false;
+                    if (r0100.Any(m => m.Contains("UNABLE TO CONNECT"))) return false;
 
-                Protocol.PopulateEcuMap(r0100);
-                return true;
+                    Protocol.PopulateEcuMap(r0100);
+                    return true;
+                }
+                else
+                {
+                    
+                }
             }
+            return false;
         }
 
         private bool IsOk(string[] lines, bool expectEcho = false)
@@ -286,7 +285,6 @@ namespace Obd2Net.Ports
                         catch (TimeoutException)
                         {
                         }
-                        // if nothing was recieved
                         if (!c.HasValue)
                         {
                             if (attempts <= 0)
@@ -299,12 +297,11 @@ namespace Obd2Net.Ports
                             attempts -= 1;
                             continue;
                         }
-                        // end on chevron (ELM prompt character)
-                        if (c == '>')
+                        
+                        if (c == '>') // end on chevron (ELM prompt character)
                             break;
 
-                        // skip null characters (ELM spec page 9)
-                        if (c == '\x00')
+                        if (c == '\x00') // skip null characters (ELM spec page 9)
                             continue;
 
                         buffer.Add(c.Value); // whatever is left must be part of the response

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Obd2Net.Infrastructure.Commands;
+using Obd2Net.Infrastructure;
 using Obd2Net.Infrastructure.Query;
 using Obd2Net.InfrastructureContracts.Commands;
 

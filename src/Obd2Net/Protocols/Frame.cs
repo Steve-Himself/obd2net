@@ -1,6 +1,6 @@
-﻿using Obd2Net.InfrastructureContracts;
+﻿using Obd2Net.InfrastructureContracts.Protocols;
 
-namespace Obd2Net
+namespace Obd2Net.Protocols
 {
     internal class Frame : IFrame
     {
