@@ -15,6 +15,6 @@ namespace Obd2Net.Infrastructure.Query
         }
         public IEnumerable<IOBDCommand> Commands { get; private set; }
 
-        public IOBDCommand<IDictionary<string, string>> GetFreezeDtc { get; } = new OBDCommand<IDictionary<string, string>>("GET_FREEZE_DTC", "Get Freeze DTCs", "07", 0, Decoders.DTC, ECU.All, false);
+        public IOBDCommand<IDictionary<string, string>> GetFreezeDtc { get; } = new OBDCommand<IDictionary<string, string>>("GET_FREEZE_DTC", "Get Freeze DTCs", "07", 0, OldDecoders.DTC, ECU.All, false);
     }
 }

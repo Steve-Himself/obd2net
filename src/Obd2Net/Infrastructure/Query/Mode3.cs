@@ -15,6 +15,6 @@ namespace Obd2Net.Infrastructure.Query
         }
         public IEnumerable<IOBDCommand> Commands { get; private set; }
 
-        public IOBDCommand<IDictionary<string,string>> GetDtc { get; } = new OBDCommand<IDictionary<string, string>>("GET_DTC", "Get DTCs", "03", 0, Decoders.DTC, ECU.All, false);
+        public IOBDCommand<IDictionary<string,string>> GetDtc { get; } = new OBDCommand<IDictionary<string, string>>("GET_DTC", "Get DTCs", "03", 0, OldDecoders.DTC, ECU.All, false);
     }
 }

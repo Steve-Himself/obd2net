@@ -15,6 +15,6 @@ namespace Obd2Net.Infrastructure.Query
         }
         public IEnumerable<IOBDCommand> Commands { get; private set; }
 
-        public IOBDCommand<string> ClearDtc { get; } = new OBDCommand<string>("CLEAR_DTC", "Clear DTCs and Freeze data", "04", 0, Decoders.Drop, ECU.All, false);
+        public IOBDCommand<string> ClearDtc { get; } = new OBDCommand<string>("CLEAR_DTC", "Clear DTCs and Freeze data", "04", 0, OldDecoders.Drop, ECU.All, false);
     }
 }

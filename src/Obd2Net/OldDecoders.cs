@@ -10,7 +10,7 @@ using Obd2Net.Protocols;
 
 namespace Obd2Net
 {
-    internal static class Decoders
+    internal static class OldDecoders
     {
         private const string UnknownErrorCode = "Unknown error code";
 
