@@ -41,8 +41,10 @@
   <ItemGroup>
     <Compile Include="Commands\IOBDCommand.cs" />
     <Compile Include="Enums\ECU.cs" />
+    <Compile Include="Enums\Mode.cs" />
     <Compile Include="Enums\Unit.cs" />
     <Compile Include="ICommands.cs" />
+    <Compile Include="IDecoder.cs" />
     <Compile Include="Protocols\IFrame.cs" />
     <Compile Include="ILogger.cs" />
     <Compile Include="Protocols\IMessage.cs" />

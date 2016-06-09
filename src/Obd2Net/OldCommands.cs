@@ -6,7 +6,7 @@ using Obd2Net.InfrastructureContracts.Commands;
 
 namespace Obd2Net
 {
-    public static class Commands
+    public static class OldCommands
     {
         public static Mode1 Mode1 { get; } = new Mode1();
         public static Mode2 Mode2 { get; } = new Mode2();
@@ -15,7 +15,7 @@ namespace Obd2Net
         public static Mode7 Mode7 { get; } = new Mode7();
         public static Misc Misc { get; } = new Misc();
 
-        static Commands()
+        static OldCommands()
         {
             All.AddRange(Mode1.Commands);
             All.AddRange(Mode2.Commands);

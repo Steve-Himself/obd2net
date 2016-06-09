@@ -36,6 +36,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\OrderAttribute.cs" />
+    <Compile Include="Commands\Mode1\CoolantTemperatureCommand.cs" />
+    <Compile Include="Commands\Mode1\EngineLoadCommand.cs" />
+    <Compile Include="Commands\Mode1\FreezeDtcCommand.cs" />
+    <Compile Include="Commands\Mode1\FuelStatusCommand.cs" />
+    <Compile Include="Commands\Mode1\LongFuelTrim1Command.cs" />
+    <Compile Include="Commands\Mode1\LongFuelTrim2Command.cs" />
+    <Compile Include="Commands\Mode1\ShortFuelTrim1Command.cs" />
+    <Compile Include="Commands\Mode1\ShortFuelTrim2Command.cs" />
+    <Compile Include="Commands\Mode1\StatusCommand.cs" />
+    <Compile Include="Commands\OBDCommandBase.cs" />
+    <Compile Include="Commands\Mode1\PidsACommand.cs" />
+    <Compile Include="Commands\PidCommandBase.cs" />
     <Compile Include="Decoders\AbsEvapPressureDecoder.cs" />
     <Compile Include="Decoders\AirStatusDecoder.cs" />
     <Compile Include="Decoders\CatalystTemperatureDecoder.cs" />
@@ -53,7 +65,6 @@
     <Compile Include="Decoders\FuelRateDecoder.cs" />
     <Compile Include="Decoders\FuelStatusDecoder.cs" />
     <Compile Include="Decoders\FuelTypeDecoder.cs" />
-    <Compile Include="Decoders\IDecoder.cs" />
     <Compile Include="Decoders\InjectTimingDecoder.cs" />
     <Compile Include="Decoders\MafDecoder.cs" />
     <Compile Include="Decoders\MaxMafDecoder.cs" />
@@ -80,8 +91,9 @@
     <Compile Include="Enums\OBDCompliance.cs" />
     <Compile Include="Enums\Protocol.cs" />
     <Compile Include="Enums\SparkTests.cs" />
+    <Compile Include="Extensions\OBDCommandExtensions.cs" />
     <Compile Include="Protocols\Codes.cs" />
-    <Compile Include="Commands.cs" />
+    <Compile Include="OldCommands.cs" />
     <Compile Include="Configuration\ObdBuilder.cs" />
     <Compile Include="Configuration\ObdBuilderConfiguration.cs" />
     <Compile Include="Configuration\OBDConfiguration.cs" />

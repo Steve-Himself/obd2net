@@ -15,7 +15,7 @@ namespace Obd2Net
         private readonly ILogger _logger;
         private string _lastCommand;
         private IPort _port;
-        private List<IOBDCommand> _supportedCommands = new List<IOBDCommand>(Commands.BaseCommands);
+        private List<IOBDCommand> _supportedCommands = new List<IOBDCommand>(OldCommands.BaseCommands);
 
         internal Obd(ILogger logger, IPort port)
         {
@@ -162,7 +162,7 @@ namespace Obd2Net
                 }
 
                 _logger.Debug("querying for supported PIDs (commands)...");
-                var pidGetters = Commands.PidGetters();
+                var pidGetters = OldCommands.PidGetters();
                 foreach (var get in pidGetters)
                 {
                     // PID listing commands should sequentialy become supported
@@ -183,15 +183,15 @@ namespace Obd2Net
                             var mode = get.Mode;
                             var pid = get.Pid + i + 1;
 
-                            if (Commands.HasPid(mode, pid))
+                            if (OldCommands.HasPid(mode, pid))
                             {
-                                _supportedCommands.Add(Commands.Get(mode, pid));
+                                _supportedCommands.Add(OldCommands.Get(mode, pid));
                             }
 
                             // set support for mode 2 commands
-                            if (mode == 1 && Commands.HasPid(2, pid))
+                            if (mode == 1 && OldCommands.HasPid(2, pid))
                             {
-                                _supportedCommands.Add(Commands.Get(2, pid));
+                                _supportedCommands.Add(OldCommands.Get(2, pid));
                             }
                         }
                     }

@@ -24,7 +24,7 @@ namespace Obd2Net.Console
 
             Observable
                 .Interval(TimeSpan.FromMilliseconds(100))
-                .Subscribe(x => subject.OnNext(obd.Query(Commands.Mode1.Speed)));
+                .Subscribe(x => subject.OnNext(obd.Query(OldCommands.Mode1.Speed)));
 
             //Observable
             //    .Interval(TimeSpan.FromMilliseconds(5))

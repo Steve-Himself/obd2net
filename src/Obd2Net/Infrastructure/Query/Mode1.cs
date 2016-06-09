@@ -120,6 +120,7 @@ namespace Obd2Net.Infrastructure.Query
         public IOBDCommand<decimal> LongFuelTrim1 { get; } = new OBDCommand<decimal>("LONG_FUEL_TRIM_1", "Long Term Fuel Trim - Bank 1", "0107", 1, OldDecoders.Percent_centered, ECU.Engine, true);
         public IOBDCommand<decimal> ShortFuelTrim2 { get; } = new OBDCommand<decimal>("SHORT_FUEL_TRIM_2", "Short Term Fuel Trim - Bank 2", "0108", 1, OldDecoders.Percent_centered, ECU.Engine, true);
         public IOBDCommand<decimal> LongFuelTrim2 { get; } = new OBDCommand<decimal>("LONG_FUEL_TRIM_2", "Long Term Fuel Trim - Bank 2", "0109", 1, OldDecoders.Percent_centered, ECU.Engine, true);
+//
         public IOBDCommand<uint> FuelPressure { get; } = new OBDCommand<uint>("FUEL_PRESSURE", "Fuel Pressure", "010A", 1, OldDecoders.Fuel_pressure, ECU.Engine, true);
         public IOBDCommand<uint> IntakePressure { get; } = new OBDCommand<uint>("INTAKE_PRESSURE", "Intake Manifold Pressure", "010B", 1, OldDecoders.Pressure, ECU.Engine, true);
         public IOBDCommand<decimal> Rpm { get; } = new OBDCommand<decimal>("RPM", "Engine RPM", "010C", 2, OldDecoders.Rpm, ECU.Engine, true);
